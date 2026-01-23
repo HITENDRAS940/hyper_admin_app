@@ -1,6 +1,17 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const DummyCard = () => <View><Text>Card</Text></View>;
+interface RevenueCardProps {
+  data: {
+    totalRevenue: number;
+    totalBookings: number;
+    bookedSlots: number;
+    availableSlots: number;
+  };
+}
 
-export default DummyCard;
+const RevenueCard: React.FC<RevenueCardProps> = ({ data }) => (
+  <View><Text>Revenue: {data.totalRevenue}</Text></View>
+);
+
+export default RevenueCard;

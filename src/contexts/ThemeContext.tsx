@@ -1,18 +1,20 @@
 import React, { createContext, useContext, useState } from 'react';
 
 const colors = {
-  primary: '#007AFF', // Example primary
-  secondary: '#5856D6', // Example secondary
-  background: '#F2F2F7', // iOS default bg
+  primary: '#0F172A', // Darker navy/black
+  secondary: '#6366F1', // Premium Indigo
+  background: '#F8F9FA', // Clean light background
   surface: '#FFFFFF',
-  text: '#000000',
-  textSecondary: '#8E8E93',
-  border: '#C7C7CC',
-  error: '#FF3B30',
-  success: '#34C759',
-  gray: '#8E8E93',
+  text: '#0F172A',
+  textSecondary: '#64748B',
+  border: '#E2E8F0',
+  error: '#EF4444',
+  success: '#10B981',
+  warning: '#F59E0B',
+  gray: '#94A3B8',
   card: '#FFFFFF',
   shadow: '#000000',
+  accent: '#A5B4FC', // Light indigo for progress bars
 };
 
 const theme = {

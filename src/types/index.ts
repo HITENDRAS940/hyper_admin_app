@@ -1,5 +1,24 @@
 // Basic type stubs to satisfy compilation
 
+export interface ArenaAmenity {
+    id: string;
+    name: string;
+    icon: string;
+    available: boolean;
+}
+
+export interface OperatingHours {
+    day: string;
+    open: string;
+    close: string;
+    isClosed: boolean;
+}
+
+export interface SportPricing {
+    sport: string;
+    pricePerHour: number;
+}
+
 export interface Service {
     id: string;
     name: string;
@@ -7,6 +26,18 @@ export interface Service {
     price?: number;
     duration?: number;
     isActive?: boolean;
+    location?: string;
+    availability?: boolean;
+    contactNumber?: string;
+    googleMapsLink?: string;
+    photos?: string[];
+    sports?: string[];
+    amenities?: ArenaAmenity[];
+    operatingHours?: OperatingHours[];
+    pricingBySport?: SportPricing[];
+    cancellationPolicy?: string;
+    approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+    ownerId?: string;
 }
 
 export interface SlotConfig {
@@ -82,6 +113,7 @@ export interface AdminBooking {
     serviceName: string;
     resourceId: number;
     resourceName: string;
+    sport?: string;
     startTime: string;
     endTime: string;
     bookingDate: string;
@@ -97,6 +129,8 @@ export interface AdminBooking {
         email: string;
         phone: string;
     };
+    paymentStatus?: 'PAID' | 'PENDING' | 'REFUNDED';
+    attendanceStatus?: 'CHECKED_IN' | 'NO_SHOW' | 'PENDING';
 }
 
 export interface PaginatedResponse<T> {

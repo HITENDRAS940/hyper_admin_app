@@ -14,7 +14,7 @@ const OTPVerificationScreen = () => {
   
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const phone = route.params?.phone;
+  const email = route.params?.email;
 
   const handleVerifyOtp = async () => {
     if (!otp || otp.length < 4) {
@@ -24,7 +24,7 @@ const OTPVerificationScreen = () => {
 
     setLoading(true);
     try {
-      const { token } = await adminAPI.verifyOtp(phone, otp);
+      const { token } = await adminAPI.verifyEmailOtp(email, otp);
       await login(token);
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Invalid OTP. Please try again.');
@@ -38,7 +38,7 @@ const OTPVerificationScreen = () => {
       <View style={styles.content}>
         <Text style={[styles.title, { color: theme.colors.text }]}>Verification</Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-          Enter the OTP sent to {phone}
+          Enter the OTP sent to {email}
         </Text>
 
         <TextInput

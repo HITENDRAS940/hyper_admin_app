@@ -10,14 +10,26 @@ import AllBookingsScreen from '../screens/admin/AllBookingsScreen';
 import AdminMoreScreen from '../screens/admin/AdminMoreScreen';
 import AdminServiceDetailScreen from '../screens/admin/AdminServiceDetailScreen';
 import UserManagementScreen from '../screens/admin/UserManagementScreen';
+import EarningsReportsScreen from '../screens/admin/EarningsReportsScreen';
+import BookingHistoryScreen from '../screens/admin/BookingHistoryScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 import CustomTabBar from '../components/shared/CustomTabBar';
 
-// Services Stack Navigator
-const ServicesStack = () => {
+// Bookings Stack (Live + History)
+const BookingsStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="LiveBookings" component={AllBookingsScreen} />
+      <Stack.Screen name="BookingHistory" component={BookingHistoryScreen} />
+    </Stack.Navigator>
+  );
+};
+
+// Slot Management Stack Navigator (formerly Services Stack)
+const SlotManagementStack = () => {
   return (
     <Stack.Navigator 
       screenOptions={{ 
@@ -38,10 +50,11 @@ const AdminNavigator = () => {
         headerShown: false,
       }}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="DASHBOARD" component={DashboardScreen} />
+      <Tab.Screen name="BOOKINGS" component={BookingsStack} />
       <Tab.Screen 
-        name="Services" 
-        component={ServicesStack}
+        name="SLOT MANAGEMENT" 
+        component={SlotManagementStack}
         options={({ route }) => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? 'ServiceManagementList';
           return {
@@ -49,9 +62,8 @@ const AdminNavigator = () => {
           };
         }}
       />
-      <Tab.Screen name="Users" component={UserManagementScreen} />
-      <Tab.Screen name="Bookings" component={AllBookingsScreen} />
-      <Tab.Screen name="More" component={AdminMoreScreen} />
+      <Tab.Screen name="EARNINGS AND REPORTS" component={EarningsReportsScreen} />
+      <Tab.Screen name="VENUE PROFILE" component={AdminMoreScreen} />
     </Tab.Navigator>
   );
 };

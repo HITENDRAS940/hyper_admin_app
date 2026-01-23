@@ -10,9 +10,10 @@ interface GradientHeaderProps {
   title: string;
   subtitle?: string;
   showBack?: boolean;
+  rightElement?: React.ReactNode;
 }
 
-const GradientHeader: React.FC<GradientHeaderProps> = ({ title, subtitle, showBack }) => {
+const GradientHeader: React.FC<GradientHeaderProps> = ({ title, subtitle, showBack, rightElement }) => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -23,40 +24,60 @@ const GradientHeader: React.FC<GradientHeaderProps> = ({ title, subtitle, showBa
       style={[styles.container, { paddingTop: insets.top }]}
     >
       <View style={styles.content}>
-        {showBack && (
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#FFF" />
-          </TouchableOpacity>
-        )}
-        <View>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        <View style={styles.leftSection}>
+          {showBack && (
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#FFF" />
+            </TouchableOpacity>
+          )}
+          <View>
+            <Text style={styles.title}>{title}</Text>
+            {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+          </View>
         </View>
+        {rightElement && (
+          <View style={styles.rightSection}>
+            {rightElement}
+          </View>
+        )}
       </View>
     </LinearGradient>
   );
 };
 
-const styles = StyleSheet.create({
+import { ScaledSheet } from 'react-native-size-matters';
+
+// ... (GradientHeaderProps and Component definition remain same)
+
+const styles = ScaledSheet.create({
   container: {
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingBottom: '20@vs',
+    paddingHorizontal: '20@s',
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  leftSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rightSection: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   backButton: {
-    marginRight: 16,
+    marginRight: '16@s',
   },
   title: {
     color: '#FFF',
-    fontSize: 20,
+    fontSize: '20@ms',
     fontWeight: 'bold',
   },
   subtitle: {
     color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
+    fontSize: '14@ms',
   },
 });
 

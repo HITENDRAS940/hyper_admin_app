@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { s, vs, ms } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Service } from '../../types';
@@ -11,9 +12,6 @@ interface AdminServiceCardProps {
   onPress?: () => void;
 }
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = width - 40; // Full width minus padding
-
 const AdminServiceCard: React.FC<AdminServiceCardProps> = ({
   service,
   onPress,
@@ -21,8 +19,10 @@ const AdminServiceCard: React.FC<AdminServiceCardProps> = ({
   const { theme } = useTheme();
   const styles = createStyles(theme);
   
-  const availabilityStatus = service.availability ?? true;
+  const availabilityStatus = service?.availability ?? true;
   const statusColor = availabilityStatus ? theme.colors.success : theme.colors.error;
+
+  if (!service) return null;
 
   return (
     <View style={[styles.card, { backgroundColor: theme.colors.card }]}>
@@ -33,20 +33,53 @@ const AdminServiceCard: React.FC<AdminServiceCardProps> = ({
       <View style={styles.watermarkContainer}>
         <Ionicons 
           name="football-outline" 
-          size={180} 
-          color={theme.colors.lightGray} 
+          size={ms(180)} 
+          color={theme.colors.gray} 
           style={{ opacity: 0.2 }} 
         />
       </View>
 
       <View style={styles.contentContainer}>
         <View style={styles.mainInfo}>
-          {/* Status Badge */}
-          <View style={[styles.statusBadge, { backgroundColor: statusColor + '15' }]}>
-            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {availabilityStatus ? 'Active' : 'Inactive'}
-            </Text>
+          <View style={styles.badgeRow}>
+            {/* Active Status Badge */}
+            <View style={[styles.statusBadge, { backgroundColor: statusColor + '15' }]}>
+              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+              <Text style={[styles.statusText, { color: statusColor }]}>
+                {availabilityStatus ? 'Active' : 'Inactive'}
+              </Text>
+            </View>
+
+            {/* Approval Status Badge */}
+            {service.approvalStatus && (
+              <View style={[
+                styles.statusBadge, 
+                { 
+                  backgroundColor: service.approvalStatus === 'APPROVED' ? theme.colors.success + '15' : 
+                                  service.approvalStatus === 'REJECTED' ? theme.colors.error + '15' : 
+                                  theme.colors.primary + '15' 
+                }
+              ]}>
+                <Ionicons 
+                  name={service.approvalStatus === 'APPROVED' ? 'checkmark-circle' : 
+                        service.approvalStatus === 'REJECTED' ? 'close-circle' : 'time'} 
+                  size={12} 
+                  color={service.approvalStatus === 'APPROVED' ? theme.colors.success : 
+                        service.approvalStatus === 'REJECTED' ? theme.colors.error : 
+                        theme.colors.primary} 
+                />
+                <Text style={[
+                  styles.statusText, 
+                  { 
+                    color: service.approvalStatus === 'APPROVED' ? theme.colors.success : 
+                           service.approvalStatus === 'REJECTED' ? theme.colors.error : 
+                           theme.colors.primary 
+                  }
+                ]}>
+                  {service.approvalStatus}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Name */}
@@ -85,81 +118,86 @@ const AdminServiceCard: React.FC<AdminServiceCardProps> = ({
 
 const createStyles = (theme: any) => StyleSheet.create({
   card: {
-    borderRadius: 20,
-    marginBottom: 16,
+    borderRadius: ms(20),
+    marginBottom: vs(16),
     flexDirection: 'column',
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: vs(4) },
     shadowOpacity: 0.08,
-    shadowRadius: 12,
+    shadowRadius: ms(12),
     elevation: 4,
-    width: CARD_WIDTH,
-    aspectRatio: 4/3,
+    width: s(335), // Default to a scaled width, though usually container handles this
+    aspectRatio: 1.33,
     position: 'relative',
   },
   statusBorder: {
     width: '100%',
-    height: 6,
+    height: vs(6),
   },
   watermarkContainer: {
     position: 'absolute',
-    right: -20,
-    bottom: -20,
+    right: s(-20),
+    bottom: vs(-20),
     zIndex: 0,
     transform: [{ rotate: '-15deg' }],
   },
   contentContainer: {
     flex: 1,
-    padding: 24,
+    padding: ms(24),
     justifyContent: 'space-between',
     zIndex: 1,
   },
   mainInfo: {
     flex: 1,
-    gap: 12,
+    gap: vs(12),
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: s(8),
+    flexWrap: 'wrap',
   },
   statusBadge: {
     alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
+    paddingHorizontal: s(8),
+    paddingVertical: vs(4),
+    borderRadius: ms(12),
+    gap: s(4),
   },
   statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: s(6),
+    height: s(6),
+    borderRadius: s(3),
   },
   statusText: {
-    fontSize: 10,
+    fontSize: ms(10),
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   name: {
-    fontSize: 28,
+    fontSize: ms(28),
     fontWeight: '800',
     letterSpacing: 0.5,
-    lineHeight: 34,
+    lineHeight: ms(34),
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: s(4),
   },
   location: {
-    fontSize: 16,
+    fontSize: ms(16),
     fontWeight: '500',
   },
   manageButton: {
-    borderRadius: 20,
+    borderRadius: ms(20),
     overflow: 'hidden',
     shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: vs(4) },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: ms(8),
     elevation: 6,
     marginTop: 'auto',
     width: '100%',
@@ -167,11 +205,11 @@ const createStyles = (theme: any) => StyleSheet.create({
   manageButtonGradient: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: vs(14),
   },
   manageButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: ms(16),
     fontWeight: '700',
     letterSpacing: 0.5,
   },

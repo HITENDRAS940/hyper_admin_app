@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Animated,
 } from 'react-native';
+import { s, vs, ms } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { adminAPI } from '../../services/api';
@@ -64,50 +65,53 @@ const UserManagementScreen = () => {
     }
   };
 
-  const renderUserItem = ({ item }: { item: ManagerUser }) => (
-    <View style={[styles.userCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-      <View style={styles.userHeader}>
-        <View style={[styles.avatarContainer, { backgroundColor: theme.colors.primary + '15' }]}>
-          <Text style={[styles.avatarText, { color: theme.colors.primary }]}>
-            {item.name ? item.name.charAt(0).toUpperCase() : '?'}
-          </Text>
+  const renderUserItem = ({ item }: { item: ManagerUser }) => {
+    if (!item) return null;
+    return (
+      <View style={[styles.userCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+        <View style={styles.userHeader}>
+          <View style={[styles.avatarContainer, { backgroundColor: theme.colors.primary + '15' }]}>
+            <Text style={[styles.avatarText, { color: theme.colors.primary }]}>
+              {item.name ? item.name.charAt(0).toUpperCase() : '?'}
+            </Text>
+          </View>
+          <View style={styles.userInfo}>
+            <Text style={[styles.userName, { color: theme.colors.text }]}>{item.name || 'Unknown'}</Text>
+            <Text style={[styles.userPhone, { color: theme.colors.textSecondary }]}>{item.phone || 'No phone'}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: item.enabled ? theme.colors.success + '15' : theme.colors.error + '15' }]}>
+            <Text style={[styles.statusText, { color: item.enabled ? theme.colors.success : theme.colors.error }]}>
+              {item.enabled ? 'Active' : 'Disabled'}
+            </Text>
+          </View>
         </View>
-        <View style={styles.userInfo}>
-          <Text style={[styles.userName, { color: theme.colors.text }]}>{item.name || 'Unknown'}</Text>
-          <Text style={[styles.userPhone, { color: theme.colors.textSecondary }]}>{item.phone}</Text>
+
+        <View style={[styles.divider, { backgroundColor: theme.colors.border + '50' }]} />
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Wallet Balance</Text>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>₹{item.wallet?.balance?.toFixed(2) ?? '0.00'}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Total Bookings</Text>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>{item.totalBookings ?? 0}</Text>
+          </View>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: item.enabled ? theme.colors.success + '15' : theme.colors.error + '15' }]}>
-          <Text style={[styles.statusText, { color: item.enabled ? theme.colors.success : theme.colors.error }]}>
-            {item.enabled ? 'Active' : 'Disabled'}
-          </Text>
+
+        <View style={styles.bookingSummary}>
+          <View style={styles.summaryItem}>
+            <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} />
+            <Text style={[styles.summaryText, { color: theme.colors.textSecondary }]}>{item.confirmedBookings ?? 0} Confirmed</Text>
+          </View>
+          <View style={styles.summaryItem}>
+            <Ionicons name="close-circle" size={14} color={theme.colors.error} />
+            <Text style={[styles.summaryText, { color: theme.colors.textSecondary }]}>{item.cancelledBookings ?? 0} Cancelled</Text>
+          </View>
         </View>
       </View>
-
-      <View style={[styles.divider, { backgroundColor: theme.colors.border + '50' }]} />
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Wallet Balance</Text>
-          <Text style={[styles.statValue, { color: theme.colors.text }]}>₹{item.wallet?.balance.toFixed(2) ?? '0.00'}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Total Bookings</Text>
-          <Text style={[styles.statValue, { color: theme.colors.text }]}>{item.totalBookings}</Text>
-        </View>
-      </View>
-
-      <View style={styles.bookingSummary}>
-        <View style={styles.summaryItem}>
-          <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} />
-          <Text style={[styles.summaryText, { color: theme.colors.textSecondary }]}>{item.confirmedBookings} Confirmed</Text>
-        </View>
-        <View style={styles.summaryItem}>
-          <Ionicons name="close-circle" size={14} color={theme.colors.error} />
-          <Text style={[styles.summaryText, { color: theme.colors.textSecondary }]}>{item.cancelledBookings} Cancelled</Text>
-        </View>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <ScreenWrapper style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -151,32 +155,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 20,
-    paddingTop: 10,
+    padding: s(20),
+    paddingTop: vs(10),
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: ms(28),
     fontWeight: '800',
     letterSpacing: -0.5,
   },
   headerSubtitle: {
-    fontSize: 15,
-    marginTop: 4,
+    fontSize: ms(15),
+    marginTop: vs(4),
     opacity: 0.8,
   },
   listContent: {
-    padding: 20,
+    padding: s(20),
     paddingTop: 0,
   },
   userCard: {
-    padding: 16,
-    borderRadius: 20,
-    marginBottom: 16,
+    padding: ms(16),
+    borderRadius: ms(20),
+    marginBottom: vs(16),
     borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: vs(4) },
     shadowOpacity: 0.05,
-    shadowRadius: 12,
+    shadowRadius: ms(12),
     elevation: 3,
   },
   userHeader: {
@@ -184,86 +188,86 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: s(48),
+    height: s(48),
+    borderRadius: s(24),
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    fontSize: 20,
+    fontSize: ms(20),
     fontWeight: '700',
   },
   userInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: s(12),
   },
   userName: {
-    fontSize: 17,
+    fontSize: ms(17),
     fontWeight: '700',
   },
   userPhone: {
-    fontSize: 14,
-    marginTop: 2,
+    fontSize: ms(14),
+    marginTop: vs(2),
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: s(10),
+    paddingVertical: vs(4),
+    borderRadius: ms(12),
   },
   statusText: {
-    fontSize: 12,
+    fontSize: ms(12),
     fontWeight: '700',
   },
   divider: {
     height: 1,
-    marginVertical: 16,
+    marginVertical: vs(16),
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: vs(12),
   },
   statItem: {
     flex: 1,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: ms(12),
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 4,
+    marginBottom: vs(4),
   },
   statValue: {
-    fontSize: 16,
+    fontSize: ms(16),
     fontWeight: '700',
   },
   bookingSummary: {
     flexDirection: 'row',
-    gap: 16,
+    gap: s(16),
   },
   summaryItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: s(4),
   },
   summaryText: {
-    fontSize: 13,
+    fontSize: ms(13),
     fontWeight: '500',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 100,
+    paddingTop: vs(100),
   },
   emptyText: {
-    fontSize: 16,
-    marginTop: 12,
+    fontSize: ms(16),
+    marginTop: vs(12),
     fontWeight: '500',
   },
   footerLoader: {
-    marginVertical: 20,
+    marginVertical: vs(20),
   },
 });
 

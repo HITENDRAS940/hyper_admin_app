@@ -8,19 +8,20 @@ import { useNavigation } from '@react-navigation/native';
 const LoginPage = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<any>();
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSendOtp = async () => {
-    if (!phone || phone.length < 10) {
-      Alert.alert('Error', 'Please enter a valid phone number');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
     setLoading(true);
     try {
-      await adminAPI.requestOtp(phone);
-      navigation.navigate('OTPVerification', { phone });
+      await adminAPI.requestEmailOtp(email);
+      navigation.navigate('OTPVerification', { email });
     } catch (error) {
       Alert.alert('Error', 'Failed to send OTP. Please try again.');
     } finally {
@@ -33,7 +34,7 @@ const LoginPage = () => {
       <View style={styles.content}>
         <Text style={[styles.title, { color: theme.colors.text }]}>Welcome Back</Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-          Enter your phone number to continue
+          Enter your email address to continue
         </Text>
 
         <TextInput
@@ -42,12 +43,13 @@ const LoginPage = () => {
             color: theme.colors.text,
             borderColor: theme.colors.border
           }]}
-          placeholder="Phone Number"
+          placeholder="Email Address"
           placeholderTextColor={theme.colors.textSecondary}
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-          maxLength={10}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          value={email}
+          onChangeText={setEmail}
         />
 
         <TouchableOpacity

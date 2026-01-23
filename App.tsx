@@ -9,8 +9,15 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import AuthNavigator from './src/navigation/AuthNavigator';
 
+import LoadingState from './src/components/shared/LoadingState';
+
 const RootNavigator = () => {
-  const { user } = useAuth();
+  const { user, isInitializing } = useAuth();
+  
+  if (isInitializing) {
+    return <LoadingState />;
+  }
+
   return user ? <AdminNavigator /> : <AuthNavigator />;
 };
 

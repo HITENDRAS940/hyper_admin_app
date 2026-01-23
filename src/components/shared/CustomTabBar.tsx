@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { ScaledSheet, ms, vs, s } from 'react-native-size-matters';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -11,16 +12,16 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 
   const getIconName = (routeName: string, isFocused: boolean): keyof typeof Ionicons.glyphMap => {
     switch (routeName) {
-      case 'Dashboard':
+      case 'DASHBOARD':
         return isFocused ? 'grid' : 'grid-outline';
-      case 'Services':
-        return isFocused ? 'briefcase' : 'briefcase-outline';
-      case 'Users':
-        return isFocused ? 'people' : 'people-outline';
-      case 'Bookings':
+      case 'BOOKING MANAGEMENT':
         return isFocused ? 'calendar' : 'calendar-outline';
-      case 'More':
-        return isFocused ? 'menu' : 'menu-outline';
+      case 'SLOT MANAGEMENT':
+        return isFocused ? 'time' : 'time-outline';
+      case 'EARNINGS AND REPORTS':
+        return isFocused ? 'stats-chart' : 'stats-chart-outline';
+      case 'VENUE PROFILE':
+        return isFocused ? 'business' : 'business-outline';
       default:
         return 'ellipse';
     }
@@ -59,14 +60,17 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
           >
             <Ionicons 
               name={getIconName(route.name, isFocused)} 
-              size={24} 
+              size={ms(22)} 
               color={isFocused ? theme.colors.primary : theme.colors.gray} 
             />
-            <Text style={{ 
-              color: isFocused ? theme.colors.primary : theme.colors.gray, 
-              fontSize: 10,
-              marginTop: 4 
-            }}>
+            <Text 
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              style={[
+                styles.tabLabel,
+                { color: isFocused ? theme.colors.primary : theme.colors.gray }
+              ]}
+            >
               {route.name}
             </Text>
           </TouchableOpacity>
@@ -76,21 +80,29 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
   );
 };
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     flexDirection: 'row',
     borderTopWidth: 1,
     elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: vs(-2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: ms(4),
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: '8@vs',
+    paddingHorizontal: '2@s',
+    minHeight: '60@vs',
+  },
+  tabLabel: {
+    fontSize: '10@ms',
+    marginTop: '2@vs',
+    textAlign: 'center',
+    paddingHorizontal: '2@s',
   },
 });
 

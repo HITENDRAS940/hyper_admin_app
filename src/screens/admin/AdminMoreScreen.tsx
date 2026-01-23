@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { ScreenWrapper } from '../../components/shared/ScreenWrapper';
 import { Ionicons } from '@expo/vector-icons';
+import { s, vs, ms } from 'react-native-size-matters';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import GradientHeader from '../../components/shared/GradientHeader';
@@ -121,7 +122,7 @@ const AdminMoreScreen = () => {
       onPress={item.onPress}
     >
       <View style={styles.menuItemLeft}>
-        <View style={[styles.iconContainer, { backgroundColor: theme.colors.lightGray }]}>
+        <View style={[styles.iconContainer, { backgroundColor: theme.colors.background }]}>
           <Ionicons name={item.icon} size={22} color={theme.colors.primary} />
         </View>
         <View style={styles.menuItemContent}>
@@ -156,8 +157,8 @@ const AdminMoreScreen = () => {
       safeAreaEdges={['left', 'right', 'bottom']}
     >
       <GradientHeader
-        title="More"
-        subtitle="Admin settings and options"
+        title="Venue Profile"
+        subtitle="Manage your venue details"
       />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
@@ -193,25 +194,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerGradient: {
-    paddingBottom: 24,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: vs(24),
+    paddingHorizontal: s(20),
+    borderBottomLeftRadius: ms(24),
+    borderBottomRightRadius: ms(24),
   },
   headerContent: {
-    paddingTop: 10,
+    paddingTop: vs(10),
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: ms(32),
     fontWeight: '800',
     color: '#FFFFFF',
-    marginBottom: 4,
+    marginBottom: vs(4),
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: ms(16),
     color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '500',
   },
@@ -219,32 +220,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: s(20),
+    paddingBottom: vs(40),
   },
   section: {
-    marginBottom: 24,
+    marginBottom: vs(24),
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: ms(13),
     fontWeight: '700',
-    marginBottom: 8,
-    marginLeft: 4,
+    marginBottom: vs(8),
+    marginLeft: s(4),
     letterSpacing: 0.5,
   },
   sectionItems: {
-    borderRadius: 16,
+    borderRadius: ms(16),
     overflow: 'hidden',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: vs(2) },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowRadius: ms(4),
     elevation: 2,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: ms(16),
   },
   menuItemLeft: {
     flexDirection: 'row',
@@ -252,51 +253,51 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: s(36),
+    height: s(36),
+    borderRadius: ms(10),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: s(12),
   },
   menuItemContent: {
     flex: 1,
   },
   menuItemTitle: {
-    fontSize: 16,
+    fontSize: ms(16),
     fontWeight: '600',
-    marginBottom: 2,
+    marginBottom: vs(2),
   },
   menuItemSubtitle: {
-    fontSize: 13,
+    fontSize: ms(13),
     opacity: 0.8,
   },
   logoutSection: {
-    marginTop: 8,
+    marginTop: vs(8),
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 16,
+    padding: ms(16),
+    borderRadius: ms(16),
     borderWidth: 1,
-    gap: 8,
-    shadowOffset: { width: 0, height: 2 },
+    gap: s(8),
+    shadowOffset: { width: 0, height: vs(2) },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowRadius: ms(4),
     elevation: 2,
   },
   logoutText: {
-    fontSize: 16,
+    fontSize: ms(16),
     fontWeight: '700',
   },
   footer: {
-    marginTop: 32,
+    marginTop: vs(32),
     alignItems: 'center',
   },
   version: {
-    fontSize: 12,
+    fontSize: ms(12),
   },
 });
 

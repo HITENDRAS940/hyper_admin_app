@@ -1,102 +1,183 @@
-import { Service, Booking, ManagerUser, AdminBooking, PaginatedResponse } from '../types';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../constants/config';
+import { Service, AdminBooking, PaginatedResponse } from '../types';
 
-// Mock data
-const services: Service[] = [
-    { id: '1', name: 'Service 1', price: 100, duration: 60, isActive: true },
-    { id: '2', name: 'Service 2', price: 200, duration: 90, isActive: true },
-];
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
-const bookings: Booking[] = [
-    { id: '1', serviceId: '1', userId: 'user1', status: 'confirmed', date: '2023-01-01', slots: [], totalAmount: 100 },
-];
+let logoutCallback: (() => void) | null = null;
 
-const users: ManagerUser[] = [
-    { id: '1', name: 'User 1', role: 'manager', isActive: true, wallet: { balance: 0 }, totalBookings: 0, confirmedBookings: 0, cancelledBookings: 0, phone: '123' },
-];
-
-// Axios-like wrapper
-const response = (data: any) => ({ data });
-
-const BASE_URL = 'http://localhost:5000';
-
-const formatPhoneNumber = (phone: string) => {
-    const cleaned = phone.replace(/\D/g, '');
-    return cleaned.startsWith('91') && cleaned.length > 10 ? `+${cleaned}` : `+91${cleaned}`;
+export const setLogoutCallback = (cb: () => void) => {
+    logoutCallback = cb;
 };
 
-let authToken: string | null = null;
+// Request interceptor to add auth token
+api.interceptors.request.use(
+    async (config) => {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
-export const setAuthToken = (token: string | null) => {
-    authToken = token;
+// Response interceptor for error handling
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const status = error.response?.status;
+
+        if (status === 401 || status === 403) {
+            const storedToken = await AsyncStorage.getItem('token');
+            const hasNoToken = !storedToken || storedToken === 'null' || storedToken === 'undefined' || storedToken === '';
+
+            if (hasNoToken) {
+                if (status === 403) {
+                    return Promise.resolve({
+                        data: { content: [], data: [], balance: 0 },
+                        status: 403,
+                        __isSilencedError: true
+                    } as any);
+                }
+            } else {
+                await AsyncStorage.multiRemove(['token', 'user']);
+                if (logoutCallback) logoutCallback();
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+// Auth APIs
+export const authAPI = {
+    sendEmailOTP: (email: string) => api.post('/auth/request-email-otp', { email }),
+    verifyEmailOTP: (email: string, otp: string) => api.post('/auth/verify-email-otp', { email, otp }),
+    // Legacy support for adminAPI
+    requestEmailOtp: (email: string) => api.post('/auth/request-email-otp', { email }).then(res => res.data),
+    verifyEmailOtp: (email: string, otp: string) => api.post('/auth/verify-email-otp', { email, otp }).then(res => res.data),
 };
 
+// Admin/Service APIs
 export const adminAPI = {
-    getServices: async (): Promise<any> => response(services),
-    getAdminServices: async (adminId: string): Promise<any> => response(services),
-    getServiceById: async (id: string): Promise<Service | undefined> => services.find(s => s.id === id),
-    getServiceBookings: async (id: string, date: string) => [],
-    getServiceSlots: async (id: string) => response([]),
-    getBookings: async (): Promise<any> => response(bookings),
-    getAllBookings: async (): Promise<any> => response(bookings),
-    getUsers: async (page: number, limit: number): Promise<any> =>
-        response({ content: users, last: true }),
+    ...authAPI,
 
-    getAdminBookings: async (page: number, size: number): Promise<PaginatedResponse<AdminBooking>> => {
-        const queryParams = new URLSearchParams({
-            page: page.toString(),
-            size: size.toString()
-        });
-        const url = `${BASE_URL}/admin/bookings?${queryParams}`;
-        console.log('Fetching admin bookings from:', url);
-        const res = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-            },
-        });
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to fetch admin bookings');
-        }
-        return res.json();
+    // Bookings
+    getAdminBookings: async (page?: number, size?: number, date?: string, status?: string): Promise<PaginatedResponse<AdminBooking>> => {
+        const params: any = {};
+        if (page !== undefined) params.page = page;
+        if (size !== undefined) params.size = size;
+        if (date) params.date = date;
+        if (status) params.status = status;
+
+        const res = await api.get('/admin/bookings', { params });
+        return res.data;
+    },
+    getServiceBookings: async (serviceId: number, date: string): Promise<any> => {
+        const res = await api.get(`/admin/service/${serviceId}/bookings`, { params: { date } });
+        return res.data;
+    },
+    createManualBooking: async (data: any): Promise<any> => {
+        const res = await api.post('/admin/booking/manual', data);
+        return res.data;
+    },
+    updateBookingStatus: async (bookingId: number, status: string, reason?: string): Promise<any> => {
+        const res = await api.post(`/admin/booking/${bookingId}/status`, { status, reason });
+        return res.data;
+    },
+    updateAttendanceStatus: async (bookingId: number, attendanceStatus: string): Promise<any> => {
+        const res = await api.post(`/admin/booking/${bookingId}/attendance`, { attendanceStatus });
+        return res.data;
+    },
+    rescheduleBooking: async (bookingId: number, data: any): Promise<any> => {
+        const res = await api.post(`/admin/booking/${bookingId}/reschedule`, data);
+        return res.data;
+    },
+    completeBooking: async (bookingId: number): Promise<any> => {
+        const res = await api.put(`/admin/bookings/${bookingId}/complete`);
+        return res.data;
     },
 
-    setServiceAvailable: async (id: string) => { },
-    setServiceNotAvailable: async (id: string) => { },
-    deleteService: async (id: string) => { },
-    disableSlotForDate: async (data: any) => { },
-    createManualBooking: async (data: any) => { },
-    updateSlotPrice: async (sId: string, slotId: string, price: number) => { },
-    enableSlot: async (sId: string, slotId: string) => { },
-    disableSlot: async (sId: string, slotId: string) => { },
-
-    // Auth
-    requestOtp: async (phone: string): Promise<void> => {
-        const formattedPhone = formatPhoneNumber(phone);
-        const res = await fetch(`${BASE_URL}/auth/request-otp`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: formattedPhone }),
-        });
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to request OTP');
-        }
+    // Services
+    getAdminServices: async (managerId: number): Promise<Service[]> => {
+        const res = await api.get(`/admin/manager/${managerId}/services`);
+        return res.data;
     },
-    verifyOtp: async (phone: string, otp: string): Promise<{ token: string }> => {
-        const formattedPhone = formatPhoneNumber(phone);
-        const res = await fetch(`${BASE_URL}/auth/verify-otp`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: formattedPhone, otp }),
-        });
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to verify OTP');
-        }
-        return res.json();
+    deleteService: async (serviceId: number): Promise<any> => {
+        const res = await api.delete(`/admin/service/${serviceId}`);
+        return res.data;
+    },
+    setServiceAvailable: async (serviceId: string): Promise<any> => {
+        const res = await api.post(`/admin/service/${serviceId}/available`);
+        return res.data;
+    },
+    setServiceNotAvailable: async (serviceId: string): Promise<any> => {
+        const res = await api.post(`/admin/service/${serviceId}/not-available`);
+        return res.data;
+    },
+
+    // Slots
+    getServiceSlots: async (serviceId: string): Promise<any> => {
+        const res = await api.get(`/admin/service/${serviceId}/slots`);
+        return res.data;
+    },
+    getSlotStatus: async (serviceId: string, date: string): Promise<any> => {
+        const res = await api.get(`/admin/service/${serviceId}/slot-status`, { params: { date } });
+        return res.data;
+    },
+    updateSlotPrice: async (serviceId: string, slotId: number, price: number): Promise<any> => {
+        const res = await api.post(`/admin/service/${serviceId}/slot/${slotId}/price`, null, { params: { price } });
+        return res.data;
+    },
+    enableSlot: async (serviceId: string, slotId: number): Promise<any> => {
+        const res = await api.post(`/admin/service/${serviceId}/slot/${slotId}/enable`);
+        return res.data;
+    },
+    disableSlot: async (serviceId: string, slotId: number): Promise<any> => {
+        const res = await api.post(`/admin/service/${serviceId}/slot/${slotId}/disable`);
+        return res.data;
+    },
+    disableSlotForDate: async (data: any): Promise<any> => {
+        const res = await api.post('/admin/service/slot/disable-date', data);
+        return res.data;
+    },
+
+    updateServiceProfile: async (serviceId: string | number, data: any): Promise<any> => {
+        const res = await api.patch(`/admin/service/${serviceId}/profile`, data);
+        return res.data;
+    },
+
+    setServiceApproval: async (serviceId: string | number, status: 'APPROVED' | 'REJECTED'): Promise<any> => {
+        const res = await api.patch(`/admin/service/${serviceId}/approval`, { status });
+        return res.data;
+    },
+
+    getAnalyticsSummary: async (): Promise<any> => {
+        const res = await api.get('/admin/analytics/summary');
+        return res.data;
+    },
+
+    // Users
+    getUsers: async (page: number, size: number): Promise<any> => {
+        const res = await api.get('/admin/users', { params: { page, size } });
+        return res.data;
     },
 };
 
 export const serviceAPI = adminAPI;
+
+export { api };
+export default {
+    ...api,
+    auth: authAPI,
+    admin: adminAPI,
+};
