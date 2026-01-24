@@ -86,30 +86,84 @@ const AllBookingsScreen = () => {
     [bookings, selectedFilter]
   );
 
+  const SCALED_SUBHEADER_MARGIN = vs(10);
+  const MAX_SUBHEADER_HEIGHT = vs(150);
+  const HEADER_BASE_HEIGHT = vs(70) + insets.top;
+
+  // Advanced Scroll: diffClamp for "Peek" behavior
   const scrollY = useSharedValue(0);
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
+  const translateY = useSharedValue(0);
+  const lastScrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      const currentScrollY = event.contentOffset.y;
+      const diff = currentScrollY - lastScrollY.value;
+      
+      // Update translateY based on scroll direction (Smart Header)
+      translateY.value = Math.min(
+        0,
+        Math.max(-MAX_SUBHEADER_HEIGHT, translateY.value - diff)
+      );
+
+      // Reset to 0 if at very top (bounces/overscroll)
+      if (currentScrollY <= 0) {
+        translateY.value = 0;
+      }
+
+      scrollY.value = currentScrollY;
+      lastScrollY.value = currentScrollY;
+    },
+  });
+
+  const vs5 = vs(5);
+  const vs20 = vs(20);
+  const vs30 = vs(30);
+  const vs40 = vs(40);
+
+  const headerStyle = useAnimatedStyle(() => {
+    // Show shadow on main header ONLY when sub-header is tucked away
+    const shadowOpacity = interpolate(
+      translateY.value,
+      [-MAX_SUBHEADER_HEIGHT, -MAX_SUBHEADER_HEIGHT + vs20],
+      [0.08, 0],
+      Extrapolate.CLAMP
+    );
+    return {
+      shadowOpacity,
+      elevation: translateY.value <= -MAX_SUBHEADER_HEIGHT + vs5 ? 4 : 0,
+      zIndex: 10,
+    };
   });
 
   const subHeaderStyle = useAnimatedStyle(() => {
-    const translateY = interpolate(
-      scrollY.value,
-      [0, 120],
-      [0, -120],
-      Extrapolate.CLAMP
-    );
-    const opacity = interpolate(
-      scrollY.value,
-      [0, 80],
-      [1, 0],
+    // Show shadow on sub-header when it's visible
+    const shadowOpacity = interpolate(
+      translateY.value,
+      [-MAX_SUBHEADER_HEIGHT + vs20, -MAX_SUBHEADER_HEIGHT + vs40],
+      [0, 0.08],
       Extrapolate.CLAMP
     );
 
     return {
-      transform: [{ translateY }],
-      opacity,
-      height: interpolate(scrollY.value, [0, 120], [120, 0], Extrapolate.CLAMP),
-      marginBottom: interpolate(scrollY.value, [0, 120], [vs(10), 0], Extrapolate.CLAMP),
+      transform: [{ translateY: translateY.value }],
+      opacity: interpolate(
+        translateY.value,
+        [-MAX_SUBHEADER_HEIGHT, -MAX_SUBHEADER_HEIGHT + vs30],
+        [0, 1],
+        Extrapolate.CLAMP
+      ),
+      position: 'absolute',
+      top: HEADER_BASE_HEIGHT,
+      left: 0,
+      right: 0,
+      zIndex: 5,
+      // Add shadow properties to sub-header
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 5,
+      shadowOpacity,
+      elevation: translateY.value > -MAX_SUBHEADER_HEIGHT + vs20 ? 3 : 0,
     };
   });
 
@@ -238,24 +292,35 @@ const AllBookingsScreen = () => {
 
   return (
     <ScreenWrapper 
-      style={[styles.container, { backgroundColor: '#F9FAFB' }]}
-      safeAreaEdges={['bottom', 'left', 'right']}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      safeAreaEdges={['left', 'right']}
     >
-      {/* Clean Header */}
-      <View style={[styles.cleanHeader, { paddingTop: insets.top + 10 }]}>
+      {/* Clean Sticky Header */}
+      <Animated.View style={[
+        styles.cleanHeader, 
+        headerStyle, 
+        { 
+          height: HEADER_BASE_HEIGHT,
+          paddingTop: insets.top,
+          backgroundColor: theme.colors.background,
+        }
+      ]}>
         <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Live Bookings</Text>
         <View style={styles.headerIcons}>
           <TouchableOpacity 
             onPress={() => navigation.navigate('BookingHistory')}
+            activeOpacity={0.7}
             style={styles.iconCircle}
           >
-            <Ionicons name="time-outline" size={20} color={theme.colors.text} />
+            <Animated.View>
+              <Ionicons name="time-outline" size={22} color={theme.colors.text} />
+            </Animated.View>
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
 
-      {/* Animated Collapsible Sub-Header */}
-      <Animated.View style={[subHeaderStyle, { zIndex: 1, backgroundColor: '#F9FAFB', overflow: 'hidden' }]}>
+      {/* Animated Collapsible Sub-Header (Absolute) */}
+      <Animated.View style={[subHeaderStyle, { backgroundColor: theme.colors.background, overflow: 'hidden' }]}>
         {/* Date Selector */}
         <View style={styles.dateSelectorWrapper}>
           <FlatList
@@ -288,7 +353,7 @@ const AllBookingsScreen = () => {
 
       <View style={{ flex: 1 }}>
         {loading && !refreshing ? (
-          <View style={styles.listLoadingContainer}>
+          <View style={[styles.listLoadingContainer, { marginTop: MAX_SUBHEADER_HEIGHT }]}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
           </View>
         ) : filteredBookings.length === 0 ? (
@@ -302,7 +367,7 @@ const AllBookingsScreen = () => {
             data={filteredBookings}
             renderItem={renderBookingItem}
             keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.list}
+            contentContainerStyle={[styles.list, { paddingTop: MAX_SUBHEADER_HEIGHT + vs(10) }]}
             onScroll={scrollHandler}
             scrollEventThrottle={16}
             refreshControl={
@@ -310,6 +375,7 @@ const AllBookingsScreen = () => {
                 refreshing={refreshing}
                 onRefresh={onRefresh}
                 tintColor={theme.colors.primary}
+                progressViewOffset={MAX_SUBHEADER_HEIGHT + vs(10)}
               />
             }
           />
@@ -392,13 +458,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: s(24),
-    paddingBottom: vs(20),
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F8F9FA',
   },
   headerTitle: {
-    fontSize: ms(28),
+    fontSize: ms(26),
     fontWeight: '800',
-    letterSpacing: -1,
+    letterSpacing: -0.8,
   },
   headerIcons: {
     flexDirection: 'row',
@@ -406,78 +471,83 @@ const styles = StyleSheet.create({
     gap: s(12),
   },
   iconCircle: {
-    width: s(40),
-    height: s(40),
-    borderRadius: s(20),
+    width: s(44),
+    height: s(44),
+    borderRadius: s(22),
     backgroundColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   dateSelectorWrapper: {
-    paddingVertical: vs(12),
-    backgroundColor: '#F9FAFB',
+    paddingVertical: vs(8),
+    backgroundColor: '#F8F9FA',
   },
   dateList: {
     paddingHorizontal: s(24),
     gap: s(12),
   },
   dateItem: {
-    width: s(50),
-    height: vs(65),
-    borderRadius: ms(16),
+    width: s(52),
+    height: vs(68),
+    borderRadius: ms(18),
     backgroundColor: '#FFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: vs(4),
+    gap: vs(2),
   },
   dayText: {
-    fontSize: ms(11),
+    fontSize: ms(10),
     fontWeight: '700',
     textTransform: 'uppercase',
+    opacity: 0.6,
   },
   dateNumber: {
-    fontSize: ms(16),
+    fontSize: ms(18),
     fontWeight: '800',
   },
   todayIndicator: {
     width: s(4),
     height: s(4),
     borderRadius: s(2),
-    position: 'absolute',
-    bottom: vs(8),
+    marginTop: vs(2),
   },
   filtersWrapper: {
     marginTop: vs(4),
-    marginBottom: vs(8),
+    marginBottom: vs(4),
   },
   filtersContainer: {
-    paddingHorizontal: s(16),
-    gap: ms(8),
-    paddingBottom: vs(8),
+    paddingHorizontal: s(20),
+    gap: ms(10),
+    paddingBottom: vs(12),
   },
   filterButton: {
-    paddingHorizontal: s(16),
-    paddingVertical: vs(8),
-    borderRadius: ms(20),
+    paddingHorizontal: s(18),
+    paddingVertical: vs(10),
+    borderRadius: ms(24),
     borderWidth: 1,
-    shadowOffset: { width: 0, height: vs(2) },
-    shadowOpacity: 0.1,
-    shadowRadius: ms(4),
-    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
   filterText: {
-    fontSize: ms(14),
-    fontWeight: '600',
+    fontSize: ms(13),
+    fontWeight: '700',
   },
   listLoadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: vs(100),
   },
   list: {
     padding: ms(16),

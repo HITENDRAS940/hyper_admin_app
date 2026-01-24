@@ -25,56 +25,46 @@ const AdminServiceCard: React.FC<AdminServiceCardProps> = ({
   if (!service) return null;
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.colors.card }]}>
-      {/* Status Border (Top) */}
-      <View style={[styles.statusBorder, { backgroundColor: statusColor }]} />
+    <TouchableOpacity 
+      style={[
+        styles.card, 
+        { 
+          backgroundColor: theme.colors.card,
+          borderColor: theme.colors.border + '50'
+        }
+      ]}
+      onPress={onPress}
+      activeOpacity={0.9}
+    >
+      {/* Top Banner Accent */}
+      <View style={[styles.topAccent, { backgroundColor: statusColor }]} />
 
-      {/* Watermark Icon */}
-      <View style={styles.watermarkContainer}>
-        <Ionicons 
-          name="football-outline" 
-          size={ms(180)} 
-          color={theme.colors.gray} 
-          style={{ opacity: 0.2 }} 
-        />
-      </View>
-
-      <View style={styles.contentContainer}>
-        <View style={styles.mainInfo}>
-          <View style={styles.badgeRow}>
-            {/* Active Status Badge */}
-            <View style={[styles.statusBadge, { backgroundColor: statusColor + '15' }]}>
-              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-              <Text style={[styles.statusText, { color: statusColor }]}>
-                {availabilityStatus ? 'Active' : 'Inactive'}
+      <View style={styles.content}>
+        <View style={styles.headerRow}>
+          {/* Status Chips */}
+          <View style={styles.chipsContainer}>
+            <View style={[styles.statusChip, { backgroundColor: statusColor + '15' }]}>
+              <View style={[styles.dot, { backgroundColor: statusColor }]} />
+              <Text style={[styles.statusChipText, { color: statusColor }]}>
+                {availabilityStatus ? 'Live' : 'Inactive'}
               </Text>
             </View>
 
-            {/* Approval Status Badge */}
             {service.approvalStatus && (
               <View style={[
-                styles.statusBadge, 
+                styles.statusChip, 
                 { 
-                  backgroundColor: service.approvalStatus === 'APPROVED' ? theme.colors.success + '15' : 
-                                  service.approvalStatus === 'REJECTED' ? theme.colors.error + '15' : 
-                                  theme.colors.primary + '15' 
+                  backgroundColor: service.approvalStatus === 'APPROVED' ? theme.colors.primary + '15' : '#71717A15'
                 }
               ]}>
                 <Ionicons 
-                  name={service.approvalStatus === 'APPROVED' ? 'checkmark-circle' : 
-                        service.approvalStatus === 'REJECTED' ? 'close-circle' : 'time'} 
+                  name={service.approvalStatus === 'APPROVED' ? 'shield-checkmark' : 'time-outline'} 
                   size={12} 
-                  color={service.approvalStatus === 'APPROVED' ? theme.colors.success : 
-                        service.approvalStatus === 'REJECTED' ? theme.colors.error : 
-                        theme.colors.primary} 
+                  color={service.approvalStatus === 'APPROVED' ? theme.colors.primary : '#71717A'} 
                 />
                 <Text style={[
-                  styles.statusText, 
-                  { 
-                    color: service.approvalStatus === 'APPROVED' ? theme.colors.success : 
-                           service.approvalStatus === 'REJECTED' ? theme.colors.error : 
-                           theme.colors.primary 
-                  }
+                  styles.statusChipText, 
+                  { color: service.approvalStatus === 'APPROVED' ? theme.colors.primary : '#71717A' }
                 ]}>
                   {service.approvalStatus}
                 </Text>
@@ -82,136 +72,168 @@ const AdminServiceCard: React.FC<AdminServiceCardProps> = ({
             )}
           </View>
 
-          {/* Name */}
-          <Text style={[styles.name, { color: theme.colors.text }]}>
+          <TouchableOpacity style={styles.moreButton} onPress={onPress}>
+            <Ionicons name="settings-outline" size={18} color={theme.colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Main Info */}
+        <View style={styles.mainInfo}>
+          <Text style={[styles.name, { color: theme.colors.text }]} numberOfLines={2}>
             {service.name}
           </Text>
-
-          {/* Location */}
-          <View style={styles.locationRow}>
-            <LocationIcon size={18} color={theme.colors.textSecondary} />
+          
+          <View style={styles.locationContainer}>
+            <View style={[styles.iconWrapper, { backgroundColor: theme.colors.background }]}>
+              <Ionicons name="location-outline" size={14} color={theme.colors.primary} />
+            </View>
             <Text style={[styles.location, { color: theme.colors.textSecondary }]} numberOfLines={1}>
-              {service.location}
+              {service.location}{service.city ? `, ${service.city}` : ''}
             </Text>
           </View>
         </View>
 
-        {/* Manage Button */}
-        <TouchableOpacity 
-          style={styles.manageButton}
-          onPress={onPress}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={[theme.colors.primary, theme.colors.secondary]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.manageButtonGradient}
-          >
-            <Text style={styles.manageButtonText}>Manage</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        {/* Footer Info */}
+        <View style={[styles.footer, { borderTopColor: theme.colors.border + '30' }]}>
+          <View style={styles.sportsContainer}>
+            {(service.sports || ['General']).slice(0, 2).map((sport, index) => (
+              <View key={index} style={[styles.sportTag, { backgroundColor: theme.colors.background }]}>
+                <Text style={[styles.sportTagText, { color: theme.colors.textSecondary }]}>{sport}</Text>
+              </View>
+            ))}
+            {service.sports && service.sports.length > 2 && (
+              <Text style={[styles.moreSportsText, { color: theme.colors.textSecondary }]}>+{service.sports.length - 2} more</Text>
+            )}
+          </View>
+
+          <View style={styles.actionPrompt}>
+            <Text style={[styles.manageLabel, { color: theme.colors.primary }]}>Manage</Text>
+            <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
+          </View>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const createStyles = (theme: any) => StyleSheet.create({
   card: {
-    borderRadius: ms(20),
-    marginBottom: vs(16),
-    flexDirection: 'column',
+    borderRadius: ms(24),
+    marginBottom: vs(20),
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: vs(4) },
-    shadowOpacity: 0.08,
-    shadowRadius: ms(12),
+    borderWidth: 1,
     elevation: 4,
-    width: s(335), // Default to a scaled width, though usually container handles this
-    aspectRatio: 1.33,
-    position: 'relative',
+    shadowOffset: { width: 0, height: vs(4) },
+    shadowOpacity: 0.06,
+    shadowRadius: ms(12),
   },
-  statusBorder: {
+  topAccent: {
+    height: vs(4),
     width: '100%',
-    height: vs(6),
+    opacity: 0.8,
   },
-  watermarkContainer: {
-    position: 'absolute',
-    right: s(-20),
-    bottom: vs(-20),
-    zIndex: 0,
-    transform: [{ rotate: '-15deg' }],
+  content: {
+    padding: ms(20),
   },
-  contentContainer: {
-    flex: 1,
-    padding: ms(24),
+  headerRow: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    zIndex: 1,
+    alignItems: 'center',
+    marginBottom: vs(16),
   },
-  mainInfo: {
-    flex: 1,
-    gap: vs(12),
-  },
-  badgeRow: {
+  chipsContainer: {
     flexDirection: 'row',
     gap: s(8),
-    flexWrap: 'wrap',
   },
-  statusBadge: {
-    alignSelf: 'flex-start',
+  statusChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: s(8),
-    paddingVertical: vs(4),
+    paddingHorizontal: s(10),
+    paddingVertical: vs(5),
     borderRadius: ms(12),
-    gap: s(4),
+    gap: s(6),
   },
-  statusDot: {
+  dot: {
     width: s(6),
     height: s(6),
     borderRadius: s(3),
   },
-  statusText: {
-    fontSize: ms(10),
+  statusChipText: {
+    fontSize: ms(11),
     fontWeight: '700',
     textTransform: 'uppercase',
-  },
-  name: {
-    fontSize: ms(28),
-    fontWeight: '800',
     letterSpacing: 0.5,
-    lineHeight: ms(34),
   },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: s(4),
-  },
-  location: {
-    fontSize: ms(16),
-    fontWeight: '500',
-  },
-  manageButton: {
-    borderRadius: ms(20),
-    overflow: 'hidden',
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: vs(4) },
-    shadowOpacity: 0.3,
-    shadowRadius: ms(8),
-    elevation: 6,
-    marginTop: 'auto',
-    width: '100%',
-  },
-  manageButtonGradient: {
+  moreButton: {
+    width: s(36),
+    height: s(36),
+    borderRadius: s(18),
+    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: vs(14),
   },
-  manageButtonText: {
-    color: '#FFFFFF',
-    fontSize: ms(16),
+  mainInfo: {
+    marginBottom: vs(20),
+  },
+  name: {
+    fontSize: ms(22),
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    lineHeight: ms(28),
+    marginBottom: vs(8),
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: s(8),
+  },
+  iconWrapper: {
+    width: s(24),
+    height: s(24),
+    borderRadius: s(8),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  location: {
+    fontSize: ms(14),
+    fontWeight: '500',
+    flex: 1,
+  },
+  footer: {
+    marginTop: vs(4),
+    paddingTop: vs(16),
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sportsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: s(6),
+  },
+  sportTag: {
+    paddingHorizontal: s(8),
+    paddingVertical: vs(4),
+    borderRadius: ms(8),
+  },
+  sportTagText: {
+    fontSize: ms(10),
+    fontWeight: '600',
+  },
+  moreSportsText: {
+    fontSize: ms(10),
+    fontWeight: '500',
+    marginLeft: s(4),
+  },
+  actionPrompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: s(2),
+  },
+  manageLabel: {
+    fontSize: ms(13),
     fontWeight: '700',
-    letterSpacing: 0.5,
   },
 });
 

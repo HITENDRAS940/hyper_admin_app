@@ -25,15 +25,6 @@ const BookingCard: React.FC<BookingCardProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  const getPaymentColor = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'PAID': return theme.colors.success;
-      case 'PENDING': return theme.colors.warning;
-      case 'REFUNDED': return theme.colors.error;
-      default: return theme.colors.textSecondary;
-    }
-  };
-
   const isAttendancePending = booking.attendanceStatus === 'PENDING' || !booking.attendanceStatus;
 
   return (
@@ -42,15 +33,17 @@ const BookingCard: React.FC<BookingCardProps> = ({
       <View style={styles.header}>
         <View style={styles.customerInfo}>
           <View style={[styles.avatarCircle, { backgroundColor: theme.colors.primary }]}>
-             <Text style={styles.avatarText}>{booking.user?.name?.charAt(0).toUpperCase() || '?'}</Text>
+             <Text style={styles.avatarText}>{booking.user?.name?.charAt(0).toUpperCase() || 'G'}</Text>
           </View>
           <View style={styles.nameSection}>
             <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>
-              {booking.user?.name || 'Unknown User'}
+              {booking.user?.name || 'Guest User'}
             </Text>
-            <Text style={[styles.phone, { color: theme.colors.textSecondary }]}>
-              {booking.user?.phone || 'No phone'}
-            </Text>
+            {booking.user?.phone && (
+              <Text style={[styles.phone, { color: theme.colors.textSecondary }]}>
+                {booking.user.phone}
+              </Text>
+            )}
           </View>
         </View>
         <View style={styles.headerIcons}>
@@ -68,33 +61,35 @@ const BookingCard: React.FC<BookingCardProps> = ({
       {/* Details Grid */}
       <View style={styles.detailsGrid}>
         <View style={styles.detailItem}>
-          <Ionicons name="football" size={16} color={theme.colors.primary} />
-          <Text style={[styles.detailText, { color: theme.colors.text }]}>{booking.sport || 'General'}</Text>
+          <Ionicons name="calendar-outline" size={14} color={theme.colors.primary} />
+          <Text style={[styles.detailText, { color: theme.colors.text }]}>
+            {format(new Date(booking.bookingDate), 'MMM dd, yyyy')}
+          </Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="time-outline" size={16} color={theme.colors.primary} />
+          <Ionicons name="time-outline" size={14} color={theme.colors.primary} />
           <Text style={[styles.detailText, { color: theme.colors.text }]}>{booking.startTime} - {booking.endTime}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="business-outline" size={16} color={theme.colors.primary} />
-          <Text style={[styles.detailText, { color: theme.colors.text }]}>{booking.serviceName}</Text>
+          <Ionicons name="business-outline" size={14} color={theme.colors.primary} />
+          <Text style={[styles.detailText, { color: theme.colors.text }]} numberOfLines={1}>{booking.resourceName}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="card-outline" size={16} color={theme.colors.primary} />
-          <Text style={[styles.detailText, { color: getPaymentColor(booking.paymentStatus || 'PENDING'), fontWeight: '700' }]}>
-            {booking.paymentStatus || 'PENDING'}
+          <Ionicons name="card-outline" size={14} color={theme.colors.primary} />
+          <Text style={[styles.detailText, { color: theme.colors.secondary, fontWeight: '700' }]}>
+            {booking.amountBreakdown.currency} {booking.amountBreakdown.totalAmount.toFixed(0)}
           </Text>
         </View>
       </View>
 
       <View style={styles.metaRow}>
-        <View style={[styles.typeBadge, { backgroundColor: booking.bookingType === 'ONLINE' ? '#6366F115' : '#10B98115' }]}>
-          <Text style={[styles.typeText, { color: booking.bookingType === 'ONLINE' ? '#6366F1' : '#10B981' }]}>
+        <View style={[styles.typeBadge, { backgroundColor: (booking.bookingType === 'ONLINE' || !booking.bookingType) ? '#6366F115' : '#10B98115' }]}>
+          <Text style={[styles.typeText, { color: (booking.bookingType === 'ONLINE' || !booking.bookingType) ? '#6366F1' : '#10B981' }]}>
             {booking.bookingType || 'ONLINE'}
           </Text>
         </View>
         <Text style={[styles.createdAt, { color: theme.colors.textSecondary }]}>
-          Booked: {booking.createdAt ? format(new Date(booking.createdAt), 'MMM dd, HH:mm') : 'N/A'}
+          {booking.createdAt ? format(new Date(booking.createdAt), 'MMM dd, HH:mm') : 'N/A'}
         </Text>
       </View>
 
@@ -122,14 +117,14 @@ const BookingCard: React.FC<BookingCardProps> = ({
               style={[styles.actionButton, { backgroundColor: theme.colors.success + '15' }]} 
               onPress={() => onCheckIn?.(booking)}
             >
-              <Ionicons name="checkbox" size={18} color={theme.colors.success} />
+              <Ionicons name="checkbox" size={16} color={theme.colors.success} />
               <Text style={[styles.actionText, { color: theme.colors.success }]}>Check In</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.actionButton, { backgroundColor: theme.colors.error + '15' }]} 
               onPress={() => onNoShow?.(booking)}
             >
-              <Ionicons name="close-circle" size={18} color={theme.colors.error} />
+              <Ionicons name="close-circle" size={16} color={theme.colors.error} />
               <Text style={[styles.actionText, { color: theme.colors.error }]}>No Show</Text>
             </TouchableOpacity>
           </>
@@ -140,7 +135,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
             style={[styles.actionButton, { backgroundColor: theme.colors.primary + '15' }]} 
             onPress={() => onReschedule?.(booking)}
           >
-            <Ionicons name="calendar" size={18} color={theme.colors.primary} />
+            <Ionicons name="calendar" size={16} color={theme.colors.primary} />
             <Text style={[styles.actionText, { color: theme.colors.primary }]}>Shift</Text>
           </TouchableOpacity>
         )}
@@ -150,7 +145,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
             style={[styles.actionButton, { backgroundColor: theme.colors.error + '10' }]} 
             onPress={() => onCancel?.(booking)}
           >
-            <Ionicons name="trash-outline" size={18} color={theme.colors.error} />
+            <Ionicons name="trash-outline" size={16} color={theme.colors.error} />
             <Text style={[styles.actionText, { color: theme.colors.error }]}>Cancel</Text>
           </TouchableOpacity>
         )}
@@ -161,145 +156,145 @@ const BookingCard: React.FC<BookingCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: ms(20),
-    padding: ms(16),
-    marginBottom: vs(16),
+    borderRadius: ms(16),
+    padding: ms(12),
+    marginBottom: vs(12),
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: vs(2) },
     shadowOpacity: 0.05,
-    shadowRadius: ms(10),
+    shadowRadius: ms(8),
     elevation: 3,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: vs(12),
+    marginBottom: vs(8),
   },
   customerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: s(10),
+    gap: s(8),
     flex: 1,
   },
   avatarCircle: {
-    width: s(40),
-    height: s(40),
-    borderRadius: s(20),
+    width: s(34),
+    height: s(34),
+    borderRadius: s(17),
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
     color: '#FFF',
-    fontSize: ms(16),
+    fontSize: ms(14),
     fontWeight: '800',
   },
   nameSection: {
     flex: 1,
-    gap: vs(1),
+    gap: 0,
   },
   userName: {
-    fontSize: ms(19),
+    fontSize: ms(16),
     fontWeight: '800',
-    letterSpacing: -0.6,
+    letterSpacing: -0.4,
   },
   phone: {
-    fontSize: ms(12),
+    fontSize: ms(11),
     fontWeight: '600',
     opacity: 0.7,
   },
   headerIcons: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: s(8),
+    gap: s(6),
   },
   iconCircle: {
-    height: vs(28),
-    paddingHorizontal: s(8),
-    borderRadius: ms(8),
+    height: vs(24),
+    paddingHorizontal: s(6),
+    borderRadius: ms(6),
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
   },
   refCode: {
-    fontSize: ms(10),
+    fontSize: ms(9),
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   divider: {
     height: 1,
-    marginVertical: vs(12),
+    marginVertical: vs(8),
   },
   detailsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: ms(12),
-    marginBottom: vs(12),
+    gap: ms(8),
+    marginBottom: vs(8),
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: s(6),
+    gap: s(4),
     minWidth: '45%',
   },
   detailText: {
-    fontSize: ms(13),
+    fontSize: ms(12),
     fontWeight: '500',
   },
   metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: vs(12),
+    marginBottom: vs(8),
   },
   typeBadge: {
-    paddingHorizontal: s(8),
-    paddingVertical: vs(4),
-    borderRadius: ms(8),
+    paddingHorizontal: s(6),
+    paddingVertical: vs(2),
+    borderRadius: ms(6),
   },
   typeText: {
-    fontSize: ms(10),
+    fontSize: ms(9),
     fontWeight: '800',
   },
   createdAt: {
-    fontSize: ms(11),
+    fontSize: ms(10),
   },
   attendanceSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: ms(10),
-    borderRadius: ms(12),
-    marginBottom: vs(16),
-    gap: s(8),
+    padding: ms(8),
+    borderRadius: ms(10),
+    marginBottom: vs(12),
+    gap: s(6),
   },
   attendanceLabel: {
-    fontSize: ms(12),
+    fontSize: ms(11),
     fontWeight: '600',
   },
   attendanceValue: {
     flex: 1,
   },
   attendanceStatusText: {
-    fontSize: ms(12),
+    fontSize: ms(11),
     fontWeight: '800',
   },
   actionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: ms(8),
+    gap: ms(6),
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: s(12),
-    paddingVertical: vs(8),
-    borderRadius: ms(12),
-    gap: s(6),
+    paddingHorizontal: s(10),
+    paddingVertical: vs(6),
+    borderRadius: ms(10),
+    gap: s(4),
   },
   actionText: {
-    fontSize: ms(12),
+    fontSize: ms(11),
     fontWeight: '700',
   },
 });

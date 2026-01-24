@@ -108,6 +108,10 @@ export const adminAPI = {
     },
 
     // Services
+    getServices: async (page: number = 0, size: number = 10): Promise<PaginatedResponse<Service>> => {
+        const res = await api.get('/admin/services', { params: { pageNo: page, pageSize: size } });
+        return res.data;
+    },
     getAdminServices: async (managerId: number): Promise<Service[]> => {
         const res = await api.get(`/admin/manager/${managerId}/services`);
         return res.data;

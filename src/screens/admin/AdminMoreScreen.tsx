@@ -154,7 +154,7 @@ const AdminMoreScreen = () => {
   return (
     <ScreenWrapper 
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      safeAreaEdges={['left', 'right', 'bottom']}
+      safeAreaEdges={['left', 'right']}
     >
       <GradientHeader
         title="Venue Profile"

@@ -114,7 +114,7 @@ const UserManagementScreen = () => {
   };
 
   return (
-    <ScreenWrapper style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <ScreenWrapper style={[styles.container, { backgroundColor: theme.colors.background }]} safeAreaEdges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: theme.colors.text }]}>User Management</Text>
         <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>Manage your registered customers</Text>

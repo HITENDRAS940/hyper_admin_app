@@ -170,7 +170,7 @@ const DashboardScreen = () => {
   return (
     <ScreenWrapper 
       style={[styles.container, { backgroundColor: '#F9FAFB' }]}
-      safeAreaEdges={['bottom', 'left', 'right']}
+      safeAreaEdges={['left', 'right']}
     >
       {/* Refined Header */}
       <View style={[styles.cleanHeader, { paddingTop: insets.top + 10 }]}>

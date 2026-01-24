@@ -27,6 +27,7 @@ export interface Service {
     duration?: number;
     isActive?: boolean;
     location?: string;
+    city?: string;
     availability?: boolean;
     contactNumber?: string;
     googleMapsLink?: string;
@@ -119,16 +120,16 @@ export interface AdminBooking {
     bookingDate: string;
     createdAt: string;
     amountBreakdown: AmountBreakdown;
-    bookingType: string;
-    message: string;
-    childBookings: string[];
+    bookingType: string | null;
+    message: string | null;
+    childBookings: string[] | null;
     status: string;
     user: {
         id: number;
         name: string;
         email: string;
         phone: string;
-    };
+    } | null;
     paymentStatus?: 'PAID' | 'PENDING' | 'REFUNDED';
     attendanceStatus?: 'CHECKED_IN' | 'NO_SHOW' | 'PENDING';
 }

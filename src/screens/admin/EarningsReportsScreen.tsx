@@ -66,7 +66,7 @@ const EarningsReportsScreen = () => {
 
   if (loading && !refreshing) {
     return (
-      <ScreenWrapper style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <ScreenWrapper style={[styles.container, { backgroundColor: theme.colors.background }]} safeAreaEdges={['left', 'right']}>
         <GradientHeader title="Reports" subtitle="Loading analytics..." />
         <View style={styles.center}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -83,7 +83,7 @@ const EarningsReportsScreen = () => {
   return (
     <ScreenWrapper 
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      safeAreaEdges={['left', 'right', 'bottom']}
+      safeAreaEdges={['left', 'right']}
     >
       <GradientHeader
         title="Earnings"
