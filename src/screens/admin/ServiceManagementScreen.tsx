@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,16 +15,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { adminAPI } from '../../services/api';
 import { Service } from '../../types';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from 'react-native-size-matters';
 
 // Shared Components
 import LoadingState from '../../components/shared/LoadingState';
 import EmptyState from '../../components/shared/EmptyState';
-import Button from '../../components/shared/Button';
 import AdminServiceCard from '../../components/admin/AdminServiceCard';
+import ScreenHeader from '../../components/shared/ScreenHeader';
+import usePaginatedFetch from '../../hooks/usePaginatedFetch';
 
 const ServiceManagementScreen = () => {
   const { theme } = useTheme();
@@ -32,70 +31,21 @@ const ServiceManagementScreen = () => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
 
-  // State
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const fetchServices = useCallback(
+    (page: number, size: number) => adminAPI.getServices(page, size),
+    [],
+  );
 
-  useEffect(() => {
-    fetchServices(0);
-  }, []);
-
-  const fetchServices = async (
-    pageNum: number = 0,
-    isRefreshing: boolean = false,
-  ) => {
-    try {
-      if (pageNum === 0) {
-        if (!isRefreshing) setLoading(true);
-        setError(null);
-      } else {
-        setLoadingMore(true);
-      }
-
-      const response = await adminAPI.getServices(pageNum, 10);
-
-      const newServices = response.content || [];
-      if (pageNum === 0) {
-        setServices(newServices);
-      } else {
-        setServices((prev) => [...prev, ...newServices]);
-      }
-
-      setHasMore(!response.last && newServices.length > 0);
-      setPage(pageNum);
-    } catch (err: any) {
-      console.error('Error fetching services:', err);
-      const errorMessage =
-        err.response?.data?.message || 'Failed to fetch services';
-      setError(errorMessage);
-      if (pageNum === 0) {
-        // Only alert on first page load error
-        // Alert.alert('Error', errorMessage);
-      }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-      setLoadingMore(false);
-    }
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchServices(0, true);
-  };
-
-  const handleLoadMore = () => {
-    if (!loadingMore && hasMore && !loading) {
-      fetchServices(page + 1);
-    }
-  };
-
-  // Create Handler
+  const {
+    data: services,
+    loading,
+    refreshing,
+    loadingMore,
+    error,
+    page,
+    onRefresh,
+    onLoadMore: handleLoadMore,
+  } = usePaginatedFetch<Service>({ fetchFn: fetchServices });
 
   const handleServicePress = (service: Service) => {
     navigation.navigate('AdminServiceDetail', {
@@ -118,40 +68,29 @@ const ServiceManagementScreen = () => {
       <StatusBar barStyle="dark-content" />
 
       {/* Refined Header like Dashboard */}
-      <View style={[styles.cleanHeader, { paddingTop: insets.top + 10 }]}>
-        <View>
-          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
-            Services
-          </Text>
-          <Text
-            style={[
-              styles.headerSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}
-          >
-            Manage venue listings
-          </Text>
-        </View>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity
-            style={styles.iconCircle}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={22} color={theme.colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.profileCircle}
-            onPress={() =>
+      <ScreenHeader
+        title="Services"
+        subtitle="Manage venue listings"
+        paddingTop={insets.top + 10}
+        actions={[
+          {
+            icon: 'arrow-back',
+            variant: 'outline',
+            iconSize: 22,
+            onPress: () => navigation.goBack(),
+          },
+          {
+            icon: 'add',
+            variant: 'filled',
+            iconSize: 28,
+            onPress: () =>
               Alert.alert(
                 'Coming Soon',
                 'Dynamic service creation will be available soon.',
-              )
-            }
-          >
-            <Ionicons name="add" size={28} color="#FFF" />
-          </TouchableOpacity>
-        </View>
-      </View>
+              ),
+          },
+        ]}
+      />
 
       {/* Service List */}
       <View style={{ flex: 1 }}>
@@ -212,47 +151,6 @@ const createStyles = (theme: any) =>
     container: {
       flex: 1,
       backgroundColor: '#F9FAFB', // Matching Dashboard background
-    },
-    cleanHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: s(24),
-      paddingBottom: vs(20),
-      backgroundColor: '#F9FAFB',
-    },
-    headerTitle: {
-      fontSize: ms(28),
-      fontWeight: '800',
-      letterSpacing: -1,
-    },
-    headerSubtitle: {
-      fontSize: ms(14),
-      fontWeight: '500',
-      marginTop: -vs(2),
-    },
-    headerIcons: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: s(12),
-    },
-    iconCircle: {
-      width: s(40),
-      height: s(40),
-      borderRadius: s(20),
-      backgroundColor: '#FFF',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: '#E2E8F0',
-    },
-    profileCircle: {
-      width: s(44),
-      height: s(44),
-      borderRadius: s(22),
-      backgroundColor: '#0F172A',
-      justifyContent: 'center',
-      alignItems: 'center',
     },
     listContainer: {
       padding: ms(20),

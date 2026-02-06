@@ -17,6 +17,7 @@ import { ScreenWrapper } from '../../components/shared/ScreenWrapper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import StatCard from '../../components/shared/cards/StatCard';
+import ScreenHeader from '../../components/shared/ScreenHeader';
 
 const { width } = Dimensions.get('window');
 
@@ -340,19 +341,14 @@ const DashboardScreen = () => {
       safeAreaEdges={['left', 'right']}
     >
       {/* Refined Header */}
-      <View style={[styles.cleanHeader, { paddingTop: insets.top + 10 }]}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
-          Dashboard
-        </Text>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconCircle}>
-            <Ionicons name="moon-outline" size={20} color={theme.colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.profileCircle}>
-            <Ionicons name="infinite-outline" size={24} color="#FFF" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Dashboard"
+        paddingTop={insets.top + 10}
+        actions={[
+          { icon: 'moon-outline', variant: 'outline' },
+          { icon: 'infinite-outline', variant: 'filled' },
+        ]}
+      />
 
       <ScrollView
         style={styles.content}
@@ -514,42 +510,6 @@ const DashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  cleanHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: s(24),
-    paddingBottom: vs(20),
-    backgroundColor: '#F9FAFB',
-  },
-  headerTitle: {
-    fontSize: ms(28),
-    fontWeight: '800',
-    letterSpacing: -1,
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: s(12),
-  },
-  iconCircle: {
-    width: s(40),
-    height: s(40),
-    borderRadius: s(20),
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  profileCircle: {
-    width: s(44),
-    height: s(44),
-    borderRadius: s(22),
-    backgroundColor: '#0F172A',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   content: {
     flex: 1,
