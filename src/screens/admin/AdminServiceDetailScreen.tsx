@@ -1,6 +1,16 @@
 // filepath: /Users/hitendrasingh/Desktop/EzTurf/src/screens/admin/AdminTurfDetailScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
+  StatusBar,
+} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { adminAPI, serviceAPI } from '../../services/api';
@@ -71,7 +81,12 @@ interface RevenueData {
   availableSlots: number;
 }
 
-type ModalStep = 'none' | 'slots' | 'availability' | 'manualBooking' | 'disableSlot';
+type ModalStep =
+  | 'none'
+  | 'slots'
+  | 'availability'
+  | 'manualBooking'
+  | 'disableSlot';
 
 const AdminServiceDetailScreen = () => {
   const navigation = useNavigation<any>();
@@ -79,7 +94,7 @@ const AdminServiceDetailScreen = () => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { service } = route.params;
-  
+
   // State
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookings, setBookings] = useState<ServiceBooking[]>([]);
@@ -92,11 +107,13 @@ const AdminServiceDetailScreen = () => {
   const [bookedSlotIds, setBookedSlotIds] = useState<number[]>([]);
   const [disabledSlotIds, setDisabledSlotIds] = useState<number[]>([]);
   const [currentStep, setCurrentStep] = useState<ModalStep>('none');
-  const [activeTab, setActiveTab] = useState<'slots' | 'bookings' | 'profile'>('slots');
+  const [activeTab, setActiveTab] = useState<'slots' | 'bookings' | 'profile'>(
+    'slots',
+  );
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
   const [loadingWeekly, setLoadingWeekly] = useState(false);
-  
+
   // Modal-specific state
   const [slots, setSlots] = useState<SlotConfig[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -125,15 +142,17 @@ const AdminServiceDetailScreen = () => {
         return d;
       });
 
-      const data = await Promise.all(days.map(async (day) => {
-        const dateStr = formatDateToYYYYMMDD(day);
-        const res = await serviceAPI.getSlotStatus(service.id, dateStr);
-        return {
-          date: day,
-          dateStr,
-          ...res.data
-        };
-      }));
+      const data = await Promise.all(
+        days.map(async (day) => {
+          const dateStr = formatDateToYYYYMMDD(day);
+          const res = await serviceAPI.getSlotStatus(service.id, dateStr);
+          return {
+            date: day,
+            dateStr,
+            ...res.data,
+          };
+        }),
+      );
 
       setWeeklyData(data);
     } catch (error) {
@@ -147,11 +166,15 @@ const AdminServiceDetailScreen = () => {
     try {
       setLoadingSlots(true);
       const dateStr = formatDateToYYYYMMDD(selectedDate);
-      
+
       // Fetch slot status (booked and disabled slots)
-      const slotStatusResponse = await serviceAPI.getSlotStatus(service.id, dateStr);
-      const { disabled: disabledSlotIds, booked: bookedSlotIds } = slotStatusResponse.data;
-      
+      const slotStatusResponse = await serviceAPI.getSlotStatus(
+        service.id,
+        dateStr,
+      );
+      const { disabled: disabledSlotIds, booked: bookedSlotIds } =
+        slotStatusResponse.data;
+
       // Create Sets for efficient lookup - COERCE TO NUMBERS to handle string IDs from API
       // We pass the logical IDs (1-24) to the card.
       // If the API returns db IDs, we might need to map them back to logical IDs, but the request implies we can just pass them.
@@ -172,10 +195,10 @@ const AdminServiceDetailScreen = () => {
         return {
           ...slot,
           slotId: dbId,
-          // We can leave enabled/isBooked "raw" from base config or default, 
+          // We can leave enabled/isBooked "raw" from base config or default,
           // because the Card will override them with the ID props.
           // But to be safe, let's just pass them as is.
-          enabled: slot.enabled !== false, 
+          enabled: slot.enabled !== false,
           isBooked: false, // Default false, card overrides
         };
       });
@@ -193,10 +216,15 @@ const AdminServiceDetailScreen = () => {
     } catch (error: any) {
       console.error('Error fetching slot data:', error);
       Alert.alert('Error', 'Failed to fetch slot details');
-      
+
       // Fallback
-      const rawSlotsData = mapSlotsWithBookingInfo(service.slots || [], new Set());
-      setSlotsWithBookings(rawSlotsData.map((slot: any) => ({ ...slot, slotId: slot.id })));
+      const rawSlotsData = mapSlotsWithBookingInfo(
+        service.slots || [],
+        new Set(),
+      );
+      setSlotsWithBookings(
+        rawSlotsData.map((slot: any) => ({ ...slot, slotId: slot.id })),
+      );
     } finally {
       setLoadingSlots(false);
       setLoading(false);
@@ -208,25 +236,32 @@ const AdminServiceDetailScreen = () => {
     try {
       setLoadingBookings(true);
       const dateStr = formatDateToYYYYMMDD(selectedDate);
-      
+
       // Fetch bookings for this service on the selected date
-      const bookingsData = await adminAPI.getServiceBookings(service.id, dateStr);
-      
+      const bookingsData = await adminAPI.getServiceBookings(
+        service.id,
+        dateStr,
+      );
+
       let bookingsList: ServiceBooking[] = [];
-      
+
       if (Array.isArray(bookingsData)) {
         bookingsList = bookingsData;
       } else if (bookingsData && Array.isArray(bookingsData.bookings)) {
         bookingsList = bookingsData.bookings;
-      } else if (bookingsData && bookingsData.data && Array.isArray(bookingsData.data)) {
+      } else if (
+        bookingsData &&
+        bookingsData.data &&
+        Array.isArray(bookingsData.data)
+      ) {
         bookingsList = bookingsData.data;
       }
-      
+
       // Filter bookings to only show those matching the selected date
       const filteredBookings = bookingsList.filter((b: ServiceBooking) => {
         return b.bookingDate === dateStr;
       });
-      
+
       setBookings(filteredBookings);
 
       // We need slot structure to calculate availability for Revenue Card
@@ -234,18 +269,17 @@ const AdminServiceDetailScreen = () => {
       const baseSlots = currentServiceData.slots || service.slots || [];
       // Simplistic mapping for revenue calc - we just need counts
       const slotsForRevenue: ServiceSlot[] = baseSlots.map((slot: any) => ({
-         ...slot,
-         slotId: slot.id || slot.slotId,
-         // We know which are booked from filteredBookings if we wanted to be precise, 
-         // but revenueUtils calculates this from bookings list + total slots.
-         // Effectively we just need the array length and prices.
+        ...slot,
+        slotId: slot.id || slot.slotId,
+        // We know which are booked from filteredBookings if we wanted to be precise,
+        // but revenueUtils calculates this from bookings list + total slots.
+        // Effectively we just need the array length and prices.
       }));
-      
+
       // Use bookings list + total slots to calculate revenue metrics
       // @ts-ignore - calculateRevenueData is a dummy in research mode
       const revenueData = calculateRevenueData();
       setRevenue(revenueData as any);
-
     } catch (error: any) {
       console.error('Error fetching booking data:', error);
       Alert.alert('Error', 'Failed to fetch bookings');
@@ -276,7 +310,6 @@ const AdminServiceDetailScreen = () => {
 
   // Management Actions
 
-
   const handleManageSlots = async () => {
     await loadSlots();
     setCurrentStep('slots');
@@ -285,22 +318,22 @@ const AdminServiceDetailScreen = () => {
   const handleManageAvailability = () => {
     setCurrentStep('availability');
   };
-  
+
   const loadSlots = async () => {
     setSlotsLoading(true);
     try {
       const response = await adminAPI.getServiceSlots(service.id);
       const dbSlots = response.data;
-      
+
       if (dbSlots && dbSlots.length > 0) {
         const mappedSlots = dbSlots.map((dbSlot: any, index: number) => ({
-          slotId: dbSlot.id || dbSlot.slotId || (index + 1),
+          slotId: dbSlot.id || dbSlot.slotId || index + 1,
           startTime: dbSlot.startTime,
           endTime: dbSlot.endTime,
           price: dbSlot.price,
           enabled: dbSlot.enabled === true,
         }));
-        
+
         setSlots(mappedSlots);
       }
     } catch (error: any) {
@@ -317,25 +350,23 @@ const AdminServiceDetailScreen = () => {
       `Are you sure you want to delete "${service?.name || 'this service'}"? This action cannot be undone.`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive', 
+        {
+          text: 'Delete',
+          style: 'destructive',
           onPress: async () => {
             try {
               await adminAPI.deleteService(service.id);
               Alert.alert('Success', 'Service deleted successfully', [
-                { text: 'OK', onPress: () => navigation.goBack() }
+                { text: 'OK', onPress: () => navigation.goBack() },
               ]);
             } catch (error) {
               Alert.alert('Error', 'Failed to delete service');
             }
-          }
+          },
         },
-      ]
+      ],
     );
   };
-
-
 
   const handleManualBooking = () => {
     setCurrentStep('manualBooking');
@@ -348,7 +379,7 @@ const AdminServiceDetailScreen = () => {
   const handleDisableSlotConfirm = async (slotId: number, reason: string) => {
     try {
       const dateStr = formatDateToYYYYMMDD(selectedDate);
-      
+
       await adminAPI.disableSlotForDate({
         serviceId: service.id,
         slotId: slotId,
@@ -360,7 +391,10 @@ const AdminServiceDetailScreen = () => {
       // Only refresh if on slots tab, which we likely are if disabling a slot
       if (activeTab === 'slots') fetchSlotData();
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Failed to disable slot');
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Failed to disable slot',
+      );
       throw error;
     }
   };
@@ -368,13 +402,13 @@ const AdminServiceDetailScreen = () => {
   const handleManualBookingConfirm = async (slotIds: number[]) => {
     try {
       const dateStr = formatDateToYYYYMMDD(selectedDate);
-      
+
       await adminAPI.createManualBooking({
         serviceId: service.id,
         slotIds: slotIds,
         bookingDate: dateStr,
       });
-      
+
       // Refresh data to show new booking
       if (activeTab === 'slots') fetchSlotData();
       else if (activeTab === 'bookings') fetchBookingData();
@@ -387,20 +421,22 @@ const AdminServiceDetailScreen = () => {
     try {
       setLoading(true);
       await adminAPI.updateServiceProfile(service.id, updatedData);
-      
+
       // Update local service detail state
       setCurrentServiceData((prev: any) => ({ ...prev, ...updatedData }));
       Alert.alert('Success', 'Arena profile updated successfully');
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update profile');
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Failed to update profile',
+      );
     } finally {
       setLoading(false);
     }
   };
 
   // Modal Callbacks
-
 
   const handleSlotsSave = async (updatedSlots: SlotConfig[]) => {
     try {
@@ -410,14 +446,14 @@ const AdminServiceDetailScreen = () => {
         if (slot.price !== undefined) {
           await adminAPI.updateSlotPrice(service.id, slotId, slot.price);
         }
-        
+
         if (slot.enabled) {
           await adminAPI.enableSlot(service.id, slotId);
         } else {
           await adminAPI.disableSlot(service.id, slotId);
         }
       }
-      
+
       // Refresh service data to reflect latest DB state
       if (activeTab === 'slots') fetchSlotData();
       else fetchBookingData();
@@ -441,21 +477,23 @@ const AdminServiceDetailScreen = () => {
     }
   };
 
-
-
   const closeModal = () => {
     setCurrentStep('none');
   };
-
-
 
   // Render Bookings List
   const renderBookingsList = () => {
     if (bookings.length === 0) {
       return (
         <View style={styles.emptyBookings}>
-          <Ionicons name="calendar-outline" size={48} color={theme.colors.textSecondary} />
-          <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+          <Ionicons
+            name="calendar-outline"
+            size={48}
+            color={theme.colors.textSecondary}
+          />
+          <Text
+            style={[styles.emptyText, { color: theme.colors.textSecondary }]}
+          >
             No bookings for this date
           </Text>
         </View>
@@ -469,23 +507,20 @@ const AdminServiceDetailScreen = () => {
         </Text>
 
         {bookings.map((booking) => (
-          <BookingCard
-            key={booking.id}
-            booking={booking as any}
-          />
+          <BookingCard key={booking.id} booking={booking as any} />
         ))}
       </View>
     );
   };
 
   return (
-    <ScreenWrapper 
+    <ScreenWrapper
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       safeAreaEdges={['bottom', 'left', 'right']}
     >
       <StatusBar barStyle="light-content" />
       <StatusBar barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.headerContainer}>
         <LinearGradient
@@ -495,8 +530,8 @@ const AdminServiceDetailScreen = () => {
           style={[styles.headerGradient, { paddingTop: insets.top + vs(10) }]}
         >
           <View style={styles.headerContent}>
-            <TouchableOpacity 
-              onPress={() => navigation.goBack()} 
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
               style={styles.backButton}
             >
               <BackIcon width={24} height={24} fill="#FFFFFF" />
@@ -512,9 +547,16 @@ const AdminServiceDetailScreen = () => {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleDeleteService}
-              style={[styles.backButton, { marginLeft: 16, marginRight: 0, backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}
+              style={[
+                styles.backButton,
+                {
+                  marginLeft: 16,
+                  marginRight: 0,
+                  backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                },
+              ]}
             >
               <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
             </TouchableOpacity>
@@ -523,65 +565,119 @@ const AdminServiceDetailScreen = () => {
       </View>
 
       {/* Management Action Buttons */}
-      <View style={[styles.actionButtonsContainer, { backgroundColor: theme.colors.background }]}>
-        <ScrollView 
-          horizontal 
+      <View
+        style={[
+          styles.actionButtonsContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.actionButtonsRow}
         >
-          <TouchableOpacity 
-            style={[styles.actionChip, { backgroundColor: theme.colors.primary + '15', borderColor: theme.colors.primary + '30' }]}
+          <TouchableOpacity
+            style={[
+              styles.actionChip,
+              {
+                backgroundColor: theme.colors.primary + '15',
+                borderColor: theme.colors.primary + '30',
+              },
+            ]}
             onPress={handleManageSlots}
           >
             <Ionicons name="time" size={18} color={theme.colors.primary} />
-            <Text style={[styles.actionChipText, { color: theme.colors.primary }]}>Slots</Text>
+            <Text
+              style={[styles.actionChipText, { color: theme.colors.primary }]}
+            >
+              Slots
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.actionChip, { backgroundColor: theme.colors.primary + '15', borderColor: theme.colors.primary + '30' }]}
+          <TouchableOpacity
+            style={[
+              styles.actionChip,
+              {
+                backgroundColor: theme.colors.primary + '15',
+                borderColor: theme.colors.primary + '30',
+              },
+            ]}
             onPress={handleManageAvailability}
           >
             <Ionicons name="toggle" size={18} color={theme.colors.primary} />
-            <Text style={[styles.actionChipText, { color: theme.colors.primary }]}>Availability</Text>
+            <Text
+              style={[styles.actionChipText, { color: theme.colors.primary }]}
+            >
+              Availability
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.actionChip, { backgroundColor: '#10B98115', borderColor: '#10B98130' }]}
+          <TouchableOpacity
+            style={[
+              styles.actionChip,
+              { backgroundColor: '#10B98115', borderColor: '#10B98130' },
+            ]}
             onPress={handleManualBooking}
           >
             <Ionicons name="add-circle" size={18} color="#10B981" />
-            <Text style={[styles.actionChipText, { color: '#10B981' }]}>Book</Text>
+            <Text style={[styles.actionChipText, { color: '#10B981' }]}>
+              Book
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.actionChip, { backgroundColor: '#F9731615', borderColor: '#F9731630' }]}
+          <TouchableOpacity
+            style={[
+              styles.actionChip,
+              { backgroundColor: '#F9731615', borderColor: '#F9731630' },
+            ]}
             onPress={handleDisableSlot}
           >
             <Ionicons name="ban" size={18} color="#F97316" />
-            <Text style={[styles.actionChipText, { color: '#F97316' }]}>Disable</Text>
+            <Text style={[styles.actionChipText, { color: '#F97316' }]}>
+              Disable
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
 
       {/* View Mode Toggle */}
       <View style={styles.viewModeToggle}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.modeButton, viewMode === 'daily' && styles.activeMode]}
           onPress={() => setViewMode('daily')}
         >
-          <Text style={[styles.modeText, viewMode === 'daily' && styles.activeModeText]}>Daily</Text>
+          <Text
+            style={[
+              styles.modeText,
+              viewMode === 'daily' && styles.activeModeText,
+            ]}
+          >
+            Daily
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.modeButton, viewMode === 'weekly' && styles.activeMode]}
+        <TouchableOpacity
+          style={[
+            styles.modeButton,
+            viewMode === 'weekly' && styles.activeMode,
+          ]}
           onPress={() => setViewMode('weekly')}
         >
-          <Text style={[styles.modeText, viewMode === 'weekly' && styles.activeModeText]}>Weekly</Text>
+          <Text
+            style={[
+              styles.modeText,
+              viewMode === 'weekly' && styles.activeModeText,
+            ]}
+          >
+            Weekly
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Date Selector */}
-      <View style={[styles.dateSelector, { backgroundColor: theme.colors.card }]}>
-        <TouchableOpacity 
+      <View
+        style={[styles.dateSelector, { backgroundColor: theme.colors.card }]}
+      >
+        <TouchableOpacity
           onPress={() => changeDate(-1)}
           style={styles.dateButton}
         >
@@ -590,66 +686,111 @@ const AdminServiceDetailScreen = () => {
 
         <View style={styles.dateDisplay}>
           <Text style={[styles.dateText, { color: theme.colors.text }]}>
-            {viewMode === 'daily' 
+            {viewMode === 'daily'
               ? format(selectedDate, 'EEE, MMM dd, yyyy')
-              : `${format(selectedDate, 'MMM dd')} - ${format(new Date(new Date(selectedDate).setDate(selectedDate.getDate() + 6)), 'MMM dd')}`
-            }
+              : `${format(selectedDate, 'MMM dd')} - ${format(new Date(new Date(selectedDate).setDate(selectedDate.getDate() + 6)), 'MMM dd')}`}
           </Text>
-          {viewMode === 'daily' && formatDateToYYYYMMDD(selectedDate) === formatDateToYYYYMMDD(new Date()) && (
-            <View style={[styles.todayBadge, { backgroundColor: theme.colors.primary + '20' }]}>
-              <Text style={[styles.todayText, { color: theme.colors.primary }]}>Today</Text>
-            </View>
-          )}
+          {viewMode === 'daily' &&
+            formatDateToYYYYMMDD(selectedDate) ===
+              formatDateToYYYYMMDD(new Date()) && (
+              <View
+                style={[
+                  styles.todayBadge,
+                  { backgroundColor: theme.colors.primary + '20' },
+                ]}
+              >
+                <Text
+                  style={[styles.todayText, { color: theme.colors.primary }]}
+                >
+                  Today
+                </Text>
+              </View>
+            )}
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => changeDate(viewMode === 'daily' ? 1 : 7)}
           style={styles.dateButton}
         >
-          <Ionicons name="chevron-forward" size={24} color={theme.colors.text} />
+          <Ionicons
+            name="chevron-forward"
+            size={24}
+            color={theme.colors.text}
+          />
         </TouchableOpacity>
       </View>
 
-
-
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
-        <View style={[styles.tabSelector, { backgroundColor: theme.colors.card }]}>
-          <TouchableOpacity 
+        <View
+          style={[styles.tabSelector, { backgroundColor: theme.colors.card }]}
+        >
+          <TouchableOpacity
             style={[
-              styles.tabButton, 
-              activeTab === 'slots' && { backgroundColor: theme.colors.primary }
+              styles.tabButton,
+              activeTab === 'slots' && {
+                backgroundColor: theme.colors.primary,
+              },
             ]}
             onPress={() => setActiveTab('slots')}
           >
-            <Text style={[
-              styles.tabText, 
-              { color: activeTab === 'slots' ? '#FFF' : theme.colors.textSecondary }
-            ]}>Slots</Text>
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color:
+                    activeTab === 'slots' ? '#FFF' : theme.colors.textSecondary,
+                },
+              ]}
+            >
+              Slots
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.tabButton, 
-              activeTab === 'bookings' && { backgroundColor: theme.colors.primary }
+              styles.tabButton,
+              activeTab === 'bookings' && {
+                backgroundColor: theme.colors.primary,
+              },
             ]}
             onPress={() => setActiveTab('bookings')}
           >
-            <Text style={[
-              styles.tabText, 
-              { color: activeTab === 'bookings' ? '#FFF' : theme.colors.textSecondary }
-            ]}>Bookings</Text>
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color:
+                    activeTab === 'bookings'
+                      ? '#FFF'
+                      : theme.colors.textSecondary,
+                },
+              ]}
+            >
+              Bookings
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.tabButton, 
-              activeTab === 'profile' && { backgroundColor: theme.colors.primary }
+              styles.tabButton,
+              activeTab === 'profile' && {
+                backgroundColor: theme.colors.primary,
+              },
             ]}
             onPress={() => setActiveTab('profile')}
           >
-            <Text style={[
-              styles.tabText, 
-              { color: activeTab === 'profile' ? '#FFF' : theme.colors.textSecondary }
-            ]}>Profile</Text>
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color:
+                    activeTab === 'profile'
+                      ? '#FFF'
+                      : theme.colors.textSecondary,
+                },
+              ]}
+            >
+              Profile
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -658,8 +799,8 @@ const AdminServiceDetailScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={theme.colors.primary}
             colors={[theme.colors.primary]}
@@ -667,14 +808,21 @@ const AdminServiceDetailScreen = () => {
         }
       >
         <View style={styles.content}>
-          
           {activeTab === 'slots' ? (
             // SLOTS TAB CONTENT
             viewMode === 'daily' ? (
               loadingSlots ? (
                 <View style={styles.center}>
-                  <ActivityIndicator size="large" color={theme.colors.primary} />
-                  <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                  <ActivityIndicator
+                    size="large"
+                    color={theme.colors.primary}
+                  />
+                  <Text
+                    style={[
+                      styles.loadingText,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
                     Loading slots...
                   </Text>
                 </View>
@@ -688,68 +836,121 @@ const AdminServiceDetailScreen = () => {
                     />
                   ) : (
                     <View style={styles.emptyBookings}>
-                      <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+                      <Text
+                        style={[
+                          styles.emptyText,
+                          { color: theme.colors.textSecondary },
+                        ]}
+                      >
                         No slots configured
                       </Text>
                     </View>
                   )}
                 </View>
               )
+            ) : // WEEKLY VIEW
+            loadingWeekly ? (
+              <View style={styles.center}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <Text
+                  style={[
+                    styles.loadingText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  Gathering weekly availability...
+                </Text>
+              </View>
             ) : (
-              // WEEKLY VIEW
-              loadingWeekly ? (
-                <View style={styles.center}>
-                  <ActivityIndicator size="large" color={theme.colors.primary} />
-                  <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
-                    Gathering weekly availability...
-                  </Text>
-                </View>
-              ) : (
-                <View style={styles.weeklyContainer}>
-                  {weeklyData.map((day, idx) => (
-                    <TouchableOpacity 
-                      key={idx}
-                      style={[styles.weeklyDayCard, { backgroundColor: theme.colors.card }]}
-                      onPress={() => {
-                        setSelectedDate(day.date);
-                        setViewMode('daily');
-                      }}
-                    >
-                      <View style={styles.weeklyDayHeader}>
-                        <Text style={[styles.weeklyDayName, { color: theme.colors.text }]}>
-                          {format(day.date, 'EEEE')}
-                        </Text>
-                        <Text style={[styles.weeklyDayDate, { color: theme.colors.textSecondary }]}>
-                          {format(day.date, 'MMM dd')}
+              <View style={styles.weeklyContainer}>
+                {weeklyData.map((day, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    style={[
+                      styles.weeklyDayCard,
+                      { backgroundColor: theme.colors.card },
+                    ]}
+                    onPress={() => {
+                      setSelectedDate(day.date);
+                      setViewMode('daily');
+                    }}
+                  >
+                    <View style={styles.weeklyDayHeader}>
+                      <Text
+                        style={[
+                          styles.weeklyDayName,
+                          { color: theme.colors.text },
+                        ]}
+                      >
+                        {format(day.date, 'EEEE')}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.weeklyDayDate,
+                          { color: theme.colors.textSecondary },
+                        ]}
+                      >
+                        {format(day.date, 'MMM dd')}
+                      </Text>
+                    </View>
+
+                    <View style={styles.weeklyStats}>
+                      <View style={styles.weeklyStatItem}>
+                        <View
+                          style={[
+                            styles.statDot,
+                            { backgroundColor: '#10B981' },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.statText,
+                            { color: theme.colors.textSecondary },
+                          ]}
+                        >
+                          Available:{' '}
+                          {service.slots?.length -
+                            (day.booked?.length || 0) -
+                            (day.disabled?.length || 0)}
                         </Text>
                       </View>
-                      
-                      <View style={styles.weeklyStats}>
-                        <View style={styles.weeklyStatItem}>
-                          <View style={[styles.statDot, { backgroundColor: '#10B981' }]} />
-                          <Text style={[styles.statText, { color: theme.colors.textSecondary }]}>
-                            Available: {service.slots?.length - (day.booked?.length || 0) - (day.disabled?.length || 0)}
-                          </Text>
-                        </View>
-                        <View style={styles.weeklyStatItem}>
-                          <View style={[styles.statDot, { backgroundColor: '#EF4444' }]} />
-                          <Text style={[styles.statText, { color: theme.colors.textSecondary }]}>
-                            Booked: {day.booked?.length || 0}
-                          </Text>
-                        </View>
+                      <View style={styles.weeklyStatItem}>
+                        <View
+                          style={[
+                            styles.statDot,
+                            { backgroundColor: '#EF4444' },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.statText,
+                            { color: theme.colors.textSecondary },
+                          ]}
+                        >
+                          Booked: {day.booked?.length || 0}
+                        </Text>
                       </View>
-                      <Ionicons name="chevron-forward" size={16} color={theme.colors.textSecondary} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={theme.colors.textSecondary}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
             )
           ) : activeTab === 'bookings' ? (
             // BOOKINGS TAB CONTENT
             loadingBookings ? (
               <View style={styles.center}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.loadingText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Loading bookings...
                 </Text>
               </View>
@@ -767,26 +968,22 @@ const AdminServiceDetailScreen = () => {
                     />
                   </View>
                 )}
-                
-                <View style={styles.cardContainer}>
-                  {renderBookingsList()}
-                </View>
+
+                <View style={styles.cardContainer}>{renderBookingsList()}</View>
               </>
             )
           ) : (
             // PROFILE TAB CONTENT
-            <ArenaSettingsTab 
+            <ArenaSettingsTab
               service={currentServiceData}
               onSave={handleProfileSave}
               loading={loading}
             />
           )}
-
         </View>
       </ScrollView>
 
       {/* Modals */}
-
 
       <SlotsManagementModal
         visible={currentStep === 'slots'}
@@ -805,8 +1002,6 @@ const AdminServiceDetailScreen = () => {
         currentAvailability={service.isAvailable || false}
         serviceName={service.name}
       />
-
-
 
       <ManualBookingModal
         visible={currentStep === 'manualBooking'}

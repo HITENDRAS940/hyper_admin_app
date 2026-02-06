@@ -34,12 +34,22 @@ const BookingHistoryScreen = () => {
 
   // Filter State
   const [showFilters, setShowFilters] = useState(false);
-  const [dateRange, setDateRange] = useState({ start: subDays(new Date(), 30), end: new Date() });
+  const [dateRange, setDateRange] = useState({
+    start: subDays(new Date(), 30),
+    end: new Date(),
+  });
   const [selectedSport, setSelectedSport] = useState('ALL');
   const [selectedType, setSelectedType] = useState('ALL');
   const [selectedPayment, setSelectedPayment] = useState('ALL');
 
-  const sports = ['ALL', 'Football', 'Cricket', 'Badminton', 'Esports', 'Tennis'];
+  const sports = [
+    'ALL',
+    'Football',
+    'Cricket',
+    'Badminton',
+    'Esports',
+    'Tennis',
+  ];
   const types = ['ALL', 'ONLINE', 'OFFLINE'];
   const payments = ['ALL', 'PAID', 'PENDING', 'REFUNDED'];
 
@@ -50,7 +60,12 @@ const BookingHistoryScreen = () => {
   const fetchHistory = async (date?: string, status?: string) => {
     try {
       setLoading(true);
-      const response = await adminAPI.getAdminBookings(0, 100, date, status === 'ALL' ? undefined : status);
+      const response = await adminAPI.getAdminBookings(
+        0,
+        100,
+        date,
+        status === 'ALL' ? undefined : status,
+      );
       setBookings(response.content || []);
     } catch (error) {
       console.error('Error fetching history:', error);
@@ -69,32 +84,56 @@ const BookingHistoryScreen = () => {
     setIsExporting(true);
     setTimeout(() => {
       setIsExporting(false);
-      Alert.alert('Export Success', 'Booking history exported as CSV. Check your downloads.');
+      Alert.alert(
+        'Export Success',
+        'Booking history exported as CSV. Check your downloads.',
+      );
     }, 2000);
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    const sportMatch = selectedSport === 'ALL' || booking.sport === selectedSport;
-    const typeMatch = selectedType === 'ALL' || booking.bookingType === selectedType;
-    const paymentMatch = selectedPayment === 'ALL' || booking.paymentStatus === selectedPayment;
+  const filteredBookings = bookings.filter((booking) => {
+    const sportMatch =
+      selectedSport === 'ALL' || booking.sport === selectedSport;
+    const typeMatch =
+      selectedType === 'ALL' || booking.bookingType === selectedType;
+    const paymentMatch =
+      selectedPayment === 'ALL' || booking.paymentStatus === selectedPayment;
     return sportMatch && typeMatch && paymentMatch;
   });
 
-  const renderFilterOption = (label: string, value: string, current: string, setter: (val: string) => void) => (
+  const renderFilterOption = (
+    label: string,
+    value: string,
+    current: string,
+    setter: (val: string) => void,
+  ) => (
     <TouchableOpacity
       style={[
         styles.filterOption,
-        { 
-          backgroundColor: current === value ? theme.colors.primary + '15' : theme.colors.background,
-          borderColor: current === value ? theme.colors.primary : theme.colors.border + '50'
-        }
+        {
+          backgroundColor:
+            current === value
+              ? theme.colors.primary + '15'
+              : theme.colors.background,
+          borderColor:
+            current === value
+              ? theme.colors.primary
+              : theme.colors.border + '50',
+        },
       ]}
       onPress={() => setter(value)}
     >
-      <Text style={[
-        styles.filterOptionText,
-        { color: current === value ? theme.colors.primary : theme.colors.textSecondary }
-      ]}>
+      <Text
+        style={[
+          styles.filterOptionText,
+          {
+            color:
+              current === value
+                ? theme.colors.primary
+                : theme.colors.textSecondary,
+          },
+        ]}
+      >
         {label}
       </Text>
     </TouchableOpacity>
@@ -106,21 +145,39 @@ const BookingHistoryScreen = () => {
     <ScreenWrapper style={[styles.container, { backgroundColor: '#F9FAFB' }]}>
       {/* Clean Header */}
       <View style={[styles.cleanHeader, { paddingTop: insets.top + 10 }]}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Booking History</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+          Booking History
+        </Text>
         <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => setShowFilters(true)} style={styles.iconCircle}>
-            <Ionicons name="options-outline" size={20} color={theme.colors.text} />
+          <TouchableOpacity
+            onPress={() => setShowFilters(true)}
+            style={styles.iconCircle}
+          >
+            <Ionicons
+              name="options-outline"
+              size={20}
+              color={theme.colors.text}
+            />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.summaryRow}>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: theme.colors.text }]}>{filteredBookings.length}</Text>
-          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Records</Text>
+          <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+            {filteredBookings.length}
+          </Text>
+          <Text
+            style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}
+          >
+            Records
+          </Text>
         </View>
-        <TouchableOpacity 
-          style={[styles.exportButton, { backgroundColor: theme.colors.primary }]}
+        <TouchableOpacity
+          style={[
+            styles.exportButton,
+            { backgroundColor: theme.colors.primary },
+          ]}
           onPress={handleExport}
           disabled={isExporting}
         >
@@ -141,10 +198,14 @@ const BookingHistoryScreen = () => {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+          />
         }
         ListEmptyComponent={
-          <EmptyState 
+          <EmptyState
             icon="time-outline"
             title="No Records Found"
             description="Adjust filters to see past bookings."
@@ -155,33 +216,74 @@ const BookingHistoryScreen = () => {
       {/* Advanced Filters Modal */}
       <Modal visible={showFilters} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: theme.colors.surface },
+            ]}
+          >
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Advanced Filters</Text>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+                Advanced Filters
+              </Text>
               <TouchableOpacity onPress={() => setShowFilters(false)}>
-                <Ionicons name="close" size={28} color={theme.colors.textSecondary} />
+                <Ionicons
+                  name="close"
+                  size={28}
+                  color={theme.colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={[styles.filterLabel, { color: theme.colors.textSecondary }]}>SPORT</Text>
+              <Text
+                style={[
+                  styles.filterLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                SPORT
+              </Text>
               <View style={styles.optionsGrid}>
-                {sports.map(s => renderFilterOption(s, s, selectedSport, setSelectedSport))}
+                {sports.map((s) =>
+                  renderFilterOption(s, s, selectedSport, setSelectedSport),
+                )}
               </View>
 
-              <Text style={[styles.filterLabel, { color: theme.colors.textSecondary }]}>BOOKING TYPE</Text>
+              <Text
+                style={[
+                  styles.filterLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                BOOKING TYPE
+              </Text>
               <View style={styles.optionsGrid}>
-                {types.map(t => renderFilterOption(t, t, selectedType, setSelectedType))}
+                {types.map((t) =>
+                  renderFilterOption(t, t, selectedType, setSelectedType),
+                )}
               </View>
 
-              <Text style={[styles.filterLabel, { color: theme.colors.textSecondary }]}>PAYMENT STATUS</Text>
+              <Text
+                style={[
+                  styles.filterLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                PAYMENT STATUS
+              </Text>
               <View style={styles.optionsGrid}>
-                {payments.map(p => renderFilterOption(p, p, selectedPayment, setSelectedPayment))}
+                {payments.map((p) =>
+                  renderFilterOption(p, p, selectedPayment, setSelectedPayment),
+                )}
               </View>
 
               <View style={styles.modalFooter}>
-                <TouchableOpacity 
-                  style={[styles.resetButton, { borderColor: theme.colors.border }]}
+                <TouchableOpacity
+                  style={[
+                    styles.resetButton,
+                    { borderColor: theme.colors.border },
+                  ]}
                   onPress={() => {
                     setSelectedSport('ALL');
                     setSelectedType('ALL');
@@ -189,10 +291,17 @@ const BookingHistoryScreen = () => {
                     fetchHistory();
                   }}
                 >
-                  <Text style={[styles.resetText, { color: theme.colors.text }]}>Reset</Text>
+                  <Text
+                    style={[styles.resetText, { color: theme.colors.text }]}
+                  >
+                    Reset
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.applyButton, { backgroundColor: theme.colors.primary }]}
+                <TouchableOpacity
+                  style={[
+                    styles.applyButton,
+                    { backgroundColor: theme.colors.primary },
+                  ]}
                   onPress={() => {
                     setShowFilters(false);
                     // We use the start of the date range for the single-date API filter

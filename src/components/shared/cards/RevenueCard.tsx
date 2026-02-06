@@ -11,7 +11,9 @@ interface RevenueCardProps {
 }
 
 const RevenueCard: React.FC<RevenueCardProps> = ({ data }) => (
-  <View><Text>Revenue: {data.totalRevenue}</Text></View>
+  <View>
+    <Text>Revenue: {data.totalRevenue}</Text>
+  </View>
 );
 
 export default RevenueCard;

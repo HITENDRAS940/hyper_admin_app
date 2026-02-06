@@ -23,7 +23,7 @@ const decodeJWT = (token: string) => {
       atob(base64)
         .split('')
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .join(''),
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
@@ -31,7 +31,9 @@ const decodeJWT = (token: string) => {
   }
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<ManagerUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -55,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: 'admin',
             isActive: true,
             email: payload.sub,
-            phone: payload.phone
+            phone: payload.phone,
           });
         }
       }
@@ -73,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!payload || payload.role !== 'ROLE_ADMIN') {
         throw new Error('Access denied. Admin role required.');
       }
-      
+
       await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
       setUser({
         id: payload.userId.toString(),
@@ -81,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: 'admin',
         isActive: true,
         email: payload.sub,
-        phone: payload.phone
+        phone: payload.phone,
       });
     } catch (error) {
       console.error('Login failed:', error);
@@ -101,7 +103,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isInitializing, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, isInitializing, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

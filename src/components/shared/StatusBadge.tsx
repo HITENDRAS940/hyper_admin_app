@@ -9,14 +9,17 @@ interface StatusBadgeProps {
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const { theme } = useTheme();
-  
+
   const getStatusStyle = () => {
     const s = status.toUpperCase();
     switch (s) {
       case 'CONFIRMED':
         return { bg: '#10B98120', text: '#10B981' };
       case 'COMPLETED':
-        return { bg: theme.colors.secondary + '20', text: theme.colors.secondary };
+        return {
+          bg: theme.colors.secondary + '20',
+          text: theme.colors.secondary,
+        };
       case 'EXPIRED':
         return { bg: theme.colors.gray + '20', text: theme.colors.gray };
       case 'CANCELLED':

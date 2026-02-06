@@ -8,10 +8,10 @@ interface ScreenWrapperProps {
   safeAreaEdges?: ('top' | 'right' | 'bottom' | 'left')[];
 }
 
-export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ 
-  children, 
-  style, 
-  safeAreaEdges = ['top', 'left', 'right', 'bottom'] 
+export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
+  children,
+  style,
+  safeAreaEdges = ['top', 'left', 'right', 'bottom'],
 }) => {
   return (
     <SafeAreaView edges={safeAreaEdges} style={[styles.container, style]}>

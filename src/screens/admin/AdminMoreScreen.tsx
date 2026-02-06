@@ -21,25 +21,21 @@ const AdminMoreScreen = () => {
   const { theme } = useTheme();
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              Alert.alert('Logged Out', 'You have been logged out successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to logout');
-            }
-          },
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await logout();
+            Alert.alert('Logged Out', 'You have been logged out successfully');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to logout');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const menuSections = [
@@ -59,7 +55,10 @@ const AdminMoreScreen = () => {
           subtitle: 'Manage notification preferences',
           icon: 'notifications-outline',
           onPress: () => {
-            Alert.alert('Coming Soon', 'Notification settings will be available soon');
+            Alert.alert(
+              'Coming Soon',
+              'Notification settings will be available soon',
+            );
           },
         },
       ],
@@ -80,7 +79,10 @@ const AdminMoreScreen = () => {
           subtitle: 'Get in touch with our team',
           icon: 'mail-outline',
           onPress: () => {
-            Alert.alert('Coming Soon', 'Contact support will be available soon');
+            Alert.alert(
+              'Coming Soon',
+              'Contact support will be available soon',
+            );
           },
         },
       ],
@@ -93,7 +95,10 @@ const AdminMoreScreen = () => {
           subtitle: 'Read our terms and conditions',
           icon: 'document-text-outline',
           onPress: () => {
-            Alert.alert('Coming Soon', 'Terms of service will be available soon');
+            Alert.alert(
+              'Coming Soon',
+              'Terms of service will be available soon',
+            );
           },
         },
         {
@@ -112,22 +117,36 @@ const AdminMoreScreen = () => {
     <TouchableOpacity
       key={item.title}
       style={[
-        styles.menuItem, 
-        { 
-          backgroundColor: theme.colors.card, 
+        styles.menuItem,
+        {
+          backgroundColor: theme.colors.card,
           borderBottomWidth: isLast ? 0 : 1,
-          borderBottomColor: theme.colors.border
-        }
+          borderBottomColor: theme.colors.border,
+        },
       ]}
       onPress={item.onPress}
     >
       <View style={styles.menuItemLeft}>
-        <View style={[styles.iconContainer, { backgroundColor: theme.colors.background }]}>
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: theme.colors.background },
+          ]}
+        >
           <Ionicons name={item.icon} size={22} color={theme.colors.primary} />
         </View>
         <View style={styles.menuItemContent}>
-          <Text style={[styles.menuItemTitle, { color: theme.colors.text }]}>{item.title}</Text>
-          <Text style={[styles.menuItemSubtitle, { color: theme.colors.textSecondary }]}>{item.subtitle}</Text>
+          <Text style={[styles.menuItemTitle, { color: theme.colors.text }]}>
+            {item.title}
+          </Text>
+          <Text
+            style={[
+              styles.menuItemSubtitle,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            {item.subtitle}
+          </Text>
         </View>
       </View>
       <Ionicons name="chevron-forward" size={20} color={theme.colors.gray} />
@@ -136,23 +155,29 @@ const AdminMoreScreen = () => {
 
   const renderSection = (section: any) => (
     <View key={section.title} style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>{section.title.toUpperCase()}</Text>
-      <View style={[
-        styles.sectionItems, 
-        { 
-          backgroundColor: theme.colors.card,
-          shadowColor: theme.colors.shadow,
-        }
-      ]}>
-        {section.items.map((item: any, index: number) => 
-          renderMenuItem(item, index, index === section.items.length - 1)
+      <Text
+        style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}
+      >
+        {section.title.toUpperCase()}
+      </Text>
+      <View
+        style={[
+          styles.sectionItems,
+          {
+            backgroundColor: theme.colors.card,
+            shadowColor: theme.colors.shadow,
+          },
+        ]}
+      >
+        {section.items.map((item: any, index: number) =>
+          renderMenuItem(item, index, index === section.items.length - 1),
         )}
       </View>
     </View>
   );
 
   return (
-    <ScreenWrapper 
+    <ScreenWrapper
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       safeAreaEdges={['left', 'right']}
     >
@@ -161,28 +186,39 @@ const AdminMoreScreen = () => {
         subtitle="Manage your venue details"
       />
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+      >
         {menuSections.map(renderSection)}
 
         <View style={styles.logoutSection}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.logoutButton, 
-              { 
-                borderColor: theme.colors.error, 
+              styles.logoutButton,
+              {
+                borderColor: theme.colors.error,
                 backgroundColor: theme.colors.card,
                 shadowColor: theme.colors.shadow,
-              }
-            ]} 
+              },
+            ]}
             onPress={handleLogout}
           >
-            <Ionicons name="log-out-outline" size={24} color={theme.colors.error} />
-            <Text style={[styles.logoutText, { color: theme.colors.error }]}>Logout</Text>
+            <Ionicons
+              name="log-out-outline"
+              size={24}
+              color={theme.colors.error}
+            />
+            <Text style={[styles.logoutText, { color: theme.colors.error }]}>
+              Logout
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
-          <Text style={[styles.version, { color: theme.colors.textSecondary }]}>ServiceBooking Admin v1.0.0</Text>
+          <Text style={[styles.version, { color: theme.colors.textSecondary }]}>
+            ServiceBooking Admin v1.0.0
+          </Text>
         </View>
       </ScrollView>
     </ScreenWrapper>

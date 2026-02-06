@@ -13,7 +13,7 @@ import LoadingState from './src/components/shared/LoadingState';
 
 const RootNavigator = () => {
   const { user, isInitializing } = useAuth();
-  
+
   if (isInitializing) {
     return <LoadingState />;
   }

@@ -26,26 +26,29 @@ const UserManagementScreen = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const fetchUsers = useCallback(async (pageNum: number, isRefresh: boolean = false) => {
-    try {
-      if (!isRefresh && pageNum > 0) setLoadingMore(true);
-      const response = await adminAPI.getUsers(pageNum, 10);
-      const { content, last } = response.data;
+  const fetchUsers = useCallback(
+    async (pageNum: number, isRefresh: boolean = false) => {
+      try {
+        if (!isRefresh && pageNum > 0) setLoadingMore(true);
+        const response = await adminAPI.getUsers(pageNum, 10);
+        const { content, last } = response.data;
 
-      if (isRefresh) {
-        setUsers(content);
-      } else {
-        setUsers(prev => [...prev, ...content]);
+        if (isRefresh) {
+          setUsers(content);
+        } else {
+          setUsers((prev) => [...prev, ...content]);
+        }
+        setHasMore(!last);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+        setLoadingMore(false);
       }
-      setHasMore(!last);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-      setLoadingMore(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     fetchUsers(0);
@@ -68,45 +71,121 @@ const UserManagementScreen = () => {
   const renderUserItem = ({ item }: { item: ManagerUser }) => {
     if (!item) return null;
     return (
-      <View style={[styles.userCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+      <View
+        style={[
+          styles.userCard,
+          {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
+          },
+        ]}
+      >
         <View style={styles.userHeader}>
-          <View style={[styles.avatarContainer, { backgroundColor: theme.colors.primary + '15' }]}>
+          <View
+            style={[
+              styles.avatarContainer,
+              { backgroundColor: theme.colors.primary + '15' },
+            ]}
+          >
             <Text style={[styles.avatarText, { color: theme.colors.primary }]}>
               {item.name ? item.name.charAt(0).toUpperCase() : '?'}
             </Text>
           </View>
           <View style={styles.userInfo}>
-            <Text style={[styles.userName, { color: theme.colors.text }]}>{item.name || 'Unknown'}</Text>
-            <Text style={[styles.userPhone, { color: theme.colors.textSecondary }]}>{item.phone || 'No phone'}</Text>
+            <Text style={[styles.userName, { color: theme.colors.text }]}>
+              {item.name || 'Unknown'}
+            </Text>
+            <Text
+              style={[styles.userPhone, { color: theme.colors.textSecondary }]}
+            >
+              {item.phone || 'No phone'}
+            </Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: item.enabled ? theme.colors.success + '15' : theme.colors.error + '15' }]}>
-            <Text style={[styles.statusText, { color: item.enabled ? theme.colors.success : theme.colors.error }]}>
+          <View
+            style={[
+              styles.statusBadge,
+              {
+                backgroundColor: item.enabled
+                  ? theme.colors.success + '15'
+                  : theme.colors.error + '15',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusText,
+                {
+                  color: item.enabled
+                    ? theme.colors.success
+                    : theme.colors.error,
+                },
+              ]}
+            >
               {item.enabled ? 'Active' : 'Disabled'}
             </Text>
           </View>
         </View>
 
-        <View style={[styles.divider, { backgroundColor: theme.colors.border + '50' }]} />
+        <View
+          style={[
+            styles.divider,
+            { backgroundColor: theme.colors.border + '50' },
+          ]}
+        />
 
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Wallet Balance</Text>
-            <Text style={[styles.statValue, { color: theme.colors.text }]}>₹{item.wallet?.balance?.toFixed(2) ?? '0.00'}</Text>
+            <Text
+              style={[styles.statLabel, { color: theme.colors.textSecondary }]}
+            >
+              Wallet Balance
+            </Text>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>
+              ₹{item.wallet?.balance?.toFixed(2) ?? '0.00'}
+            </Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Total Bookings</Text>
-            <Text style={[styles.statValue, { color: theme.colors.text }]}>{item.totalBookings ?? 0}</Text>
+            <Text
+              style={[styles.statLabel, { color: theme.colors.textSecondary }]}
+            >
+              Total Bookings
+            </Text>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>
+              {item.totalBookings ?? 0}
+            </Text>
           </View>
         </View>
 
         <View style={styles.bookingSummary}>
           <View style={styles.summaryItem}>
-            <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} />
-            <Text style={[styles.summaryText, { color: theme.colors.textSecondary }]}>{item.confirmedBookings ?? 0} Confirmed</Text>
+            <Ionicons
+              name="checkmark-circle"
+              size={14}
+              color={theme.colors.success}
+            />
+            <Text
+              style={[
+                styles.summaryText,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {item.confirmedBookings ?? 0} Confirmed
+            </Text>
           </View>
           <View style={styles.summaryItem}>
-            <Ionicons name="close-circle" size={14} color={theme.colors.error} />
-            <Text style={[styles.summaryText, { color: theme.colors.textSecondary }]}>{item.cancelledBookings ?? 0} Cancelled</Text>
+            <Ionicons
+              name="close-circle"
+              size={14}
+              color={theme.colors.error}
+            />
+            <Text
+              style={[
+                styles.summaryText,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {item.cancelledBookings ?? 0} Cancelled
+            </Text>
           </View>
         </View>
       </View>
@@ -114,10 +193,19 @@ const UserManagementScreen = () => {
   };
 
   return (
-    <ScreenWrapper style={[styles.container, { backgroundColor: theme.colors.background }]} safeAreaEdges={['top', 'left', 'right']}>
+    <ScreenWrapper
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      safeAreaEdges={['top', 'left', 'right']}
+    >
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>User Management</Text>
-        <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>Manage your registered customers</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+          User Management
+        </Text>
+        <Text
+          style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}
+        >
+          Manage your registered customers
+        </Text>
       </View>
 
       {loading && page === 0 ? (
@@ -128,20 +216,36 @@ const UserManagementScreen = () => {
         <FlatList
           data={users}
           renderItem={renderUserItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.colors.primary}
+            />
           }
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
-            loadingMore ? <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} /> : null
+            loadingMore ? (
+              <ActivityIndicator
+                style={styles.footerLoader}
+                color={theme.colors.primary}
+              />
+            ) : null
           }
           ListEmptyComponent={
             <View style={styles.centerContainer}>
               <ProfileIcon size={64} color={theme.colors.border} />
-              <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No users found</Text>
+              <Text
+                style={[
+                  styles.emptyText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                No users found
+              </Text>
             </View>
           }
         />

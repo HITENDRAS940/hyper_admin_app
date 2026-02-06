@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { adminAPI } from '../../services/api';
@@ -30,19 +37,26 @@ const LoginPage = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Welcome Back</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>
+          Welcome Back
+        </Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
           Enter your email address to continue
         </Text>
 
         <TextInput
-          style={[styles.input, { 
-            backgroundColor: theme.colors.surface,
-            color: theme.colors.text,
-            borderColor: theme.colors.border
-          }]}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.text,
+              borderColor: theme.colors.border,
+            },
+          ]}
           placeholder="Email Address"
           placeholderTextColor={theme.colors.textSecondary}
           keyboardType="email-address"
@@ -57,7 +71,9 @@ const LoginPage = () => {
           onPress={handleSendOtp}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>{loading ? 'Sending...' : 'Send OTP'}</Text>
+          <Text style={styles.buttonText}>
+            {loading ? 'Sending...' : 'Send OTP'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

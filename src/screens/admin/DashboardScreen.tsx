@@ -35,47 +35,97 @@ const PerformanceSection = ({ theme }: { theme: any }) => {
   return (
     <View style={styles.performanceContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Performance</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          Performance
+        </Text>
       </View>
 
       <View style={styles.performanceRow}>
         {/* Occupancy Rate */}
-        <View style={[styles.occupancyCard, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.perfLabel, { color: theme.colors.textSecondary }]}>Occupancy Rate</Text>
+        <View
+          style={[styles.occupancyCard, { backgroundColor: theme.colors.card }]}
+        >
+          <Text
+            style={[styles.perfLabel, { color: theme.colors.textSecondary }]}
+          >
+            Occupancy Rate
+          </Text>
           <View style={styles.occupancyContent}>
             <View style={styles.occupancyCircle}>
-              <Text style={[styles.occupancyValue, { color: theme.colors.primary }]}>78%</Text>
-              <Text style={[styles.occupancySub, { color: theme.colors.textSecondary }]}>today</Text>
+              <Text
+                style={[styles.occupancyValue, { color: theme.colors.primary }]}
+              >
+                78%
+              </Text>
+              <Text
+                style={[
+                  styles.occupancySub,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                today
+              </Text>
             </View>
             <View style={styles.occupancyInfo}>
               <View style={styles.perfStat}>
-                <View style={[styles.dot, { backgroundColor: theme.colors.primary }]} />
-                <Text style={[styles.perfStatText, { color: theme.colors.text }]}>84 Slots Booked</Text>
+                <View
+                  style={[
+                    styles.dot,
+                    { backgroundColor: theme.colors.primary },
+                  ]}
+                />
+                <Text
+                  style={[styles.perfStatText, { color: theme.colors.text }]}
+                >
+                  84 Slots Booked
+                </Text>
               </View>
               <View style={styles.perfStat}>
-                <View style={[styles.dot, { backgroundColor: theme.colors.border }]} />
-                <Text style={[styles.perfStatText, { color: theme.colors.text }]}>24 Slots Free</Text>
+                <View
+                  style={[styles.dot, { backgroundColor: theme.colors.border }]}
+                />
+                <Text
+                  style={[styles.perfStatText, { color: theme.colors.text }]}
+                >
+                  24 Slots Free
+                </Text>
               </View>
             </View>
           </View>
         </View>
 
         {/* Peak Hours Chart */}
-        <View style={[styles.chartCard, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.perfLabel, { color: theme.colors.textSecondary }]}>Peak Hours</Text>
+        <View
+          style={[styles.chartCard, { backgroundColor: theme.colors.card }]}
+        >
+          <Text
+            style={[styles.perfLabel, { color: theme.colors.textSecondary }]}
+          >
+            Peak Hours
+          </Text>
           <View style={styles.chartContainer}>
             {peakHours.map((item, index) => (
               <View key={index} style={styles.chartBarWrapper}>
-                <View 
+                <View
                   style={[
-                    styles.chartBar, 
-                    { 
-                      height: `${item.value}%`, 
-                      backgroundColor: item.value > 80 ? theme.colors.error : theme.colors.primary 
-                    }
-                  ]} 
+                    styles.chartBar,
+                    {
+                      height: `${item.value}%`,
+                      backgroundColor:
+                        item.value > 80
+                          ? theme.colors.error
+                          : theme.colors.primary,
+                    },
+                  ]}
                 />
-                <Text style={[styles.chartLabel, { color: theme.colors.textSecondary }]}>{item.hour}</Text>
+                <Text
+                  style={[
+                    styles.chartLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {item.hour}
+                </Text>
               </View>
             ))}
           </View>
@@ -84,32 +134,84 @@ const PerformanceSection = ({ theme }: { theme: any }) => {
 
       <View style={styles.performanceRow}>
         {/* Top Sports */}
-        <View style={[styles.topListCard, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.perfLabel, { color: theme.colors.textSecondary }]}>Top 3 Sports</Text>
+        <View
+          style={[styles.topListCard, { backgroundColor: theme.colors.card }]}
+        >
+          <Text
+            style={[styles.perfLabel, { color: theme.colors.textSecondary }]}
+          >
+            Top 3 Sports
+          </Text>
           <View style={styles.listContainer}>
             {['Football', 'Cricket', 'Tennis'].map((item, i) => (
               <View key={i} style={styles.listItem}>
-                <View style={[styles.listIcon, { backgroundColor: theme.colors.primary + '15' }]}>
-                  <Text style={[styles.listRank, { color: theme.colors.primary }]}>{i + 1}</Text>
+                <View
+                  style={[
+                    styles.listIcon,
+                    { backgroundColor: theme.colors.primary + '15' },
+                  ]}
+                >
+                  <Text
+                    style={[styles.listRank, { color: theme.colors.primary }]}
+                  >
+                    {i + 1}
+                  </Text>
                 </View>
-                <Text style={[styles.listItemText, { color: theme.colors.text }]}>{item}</Text>
-                <Text style={[styles.listItemValue, { color: theme.colors.textSecondary }]}>{40 - i * 10}%</Text>
+                <Text
+                  style={[styles.listItemText, { color: theme.colors.text }]}
+                >
+                  {item}
+                </Text>
+                <Text
+                  style={[
+                    styles.listItemValue,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {40 - i * 10}%
+                </Text>
               </View>
             ))}
           </View>
         </View>
 
         {/* Top Venues */}
-        <View style={[styles.topListCard, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.perfLabel, { color: theme.colors.textSecondary }]}>Top 3 Venues</Text>
+        <View
+          style={[styles.topListCard, { backgroundColor: theme.colors.card }]}
+        >
+          <Text
+            style={[styles.perfLabel, { color: theme.colors.textSecondary }]}
+          >
+            Top 3 Venues
+          </Text>
           <View style={styles.listContainer}>
             {['Arena Prime', 'Sunset Turf', 'City Courts'].map((item, i) => (
               <View key={i} style={styles.listItem}>
-                <View style={[styles.listIcon, { backgroundColor: theme.colors.secondary + '15' }]}>
-                  <Text style={[styles.listRank, { color: theme.colors.secondary }]}>{i + 1}</Text>
+                <View
+                  style={[
+                    styles.listIcon,
+                    { backgroundColor: theme.colors.secondary + '15' },
+                  ]}
+                >
+                  <Text
+                    style={[styles.listRank, { color: theme.colors.secondary }]}
+                  >
+                    {i + 1}
+                  </Text>
                 </View>
-                <Text style={[styles.listItemText, { color: theme.colors.text }]}>{item}</Text>
-                <Text style={[styles.listItemValue, { color: theme.colors.textSecondary }]}>₹{15 - i * 3}k</Text>
+                <Text
+                  style={[styles.listItemText, { color: theme.colors.text }]}
+                >
+                  {item}
+                </Text>
+                <Text
+                  style={[
+                    styles.listItemValue,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  ₹{15 - i * 3}k
+                </Text>
               </View>
             ))}
           </View>
@@ -121,31 +223,96 @@ const PerformanceSection = ({ theme }: { theme: any }) => {
 
 const ActivityFeed = ({ theme }: { theme: any }) => {
   const activities = [
-    { id: 1, type: 'BOOKING', title: 'New booking placed', desc: 'Arena Prime • 6:00 PM', time: '2m ago', icon: 'cart-outline', color: '#4F46E5' },
-    { id: 2, type: 'OFFLINE', title: 'Offline booking added', desc: 'Sunset Turf • 8:30 PM', time: '15m ago', icon: 'person-add-outline', color: '#10B981' },
-    { id: 3, type: 'BLOCK', title: 'Slot blocked', desc: 'City Courts • Multi-slot', time: '1h ago', icon: 'ban-outline', color: '#F59E0B' },
-    { id: 4, type: 'UPDATE', title: 'Venue profile updated', desc: 'Arena Prime • Price change', time: '3h ago', icon: 'create-outline', color: '#EC4899' },
+    {
+      id: 1,
+      type: 'BOOKING',
+      title: 'New booking placed',
+      desc: 'Arena Prime • 6:00 PM',
+      time: '2m ago',
+      icon: 'cart-outline',
+      color: '#4F46E5',
+    },
+    {
+      id: 2,
+      type: 'OFFLINE',
+      title: 'Offline booking added',
+      desc: 'Sunset Turf • 8:30 PM',
+      time: '15m ago',
+      icon: 'person-add-outline',
+      color: '#10B981',
+    },
+    {
+      id: 3,
+      type: 'BLOCK',
+      title: 'Slot blocked',
+      desc: 'City Courts • Multi-slot',
+      time: '1h ago',
+      icon: 'ban-outline',
+      color: '#F59E0B',
+    },
+    {
+      id: 4,
+      type: 'UPDATE',
+      title: 'Venue profile updated',
+      desc: 'Arena Prime • Price change',
+      time: '3h ago',
+      icon: 'create-outline',
+      color: '#EC4899',
+    },
   ];
 
   return (
     <View style={styles.activitySection}>
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Activity Feed</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          Activity Feed
+        </Text>
         <TouchableOpacity>
-          <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>View All</Text>
+          <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>
+            View All
+          </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.activityList}>
         {activities.map((item) => (
-          <View key={item.id} style={[styles.activityItem, { borderBottomColor: theme.colors.border + '50' }]}>
-            <View style={[styles.activityIcon, { backgroundColor: item.color + '15' }]}>
+          <View
+            key={item.id}
+            style={[
+              styles.activityItem,
+              { borderBottomColor: theme.colors.border + '50' },
+            ]}
+          >
+            <View
+              style={[
+                styles.activityIcon,
+                { backgroundColor: item.color + '15' },
+              ]}
+            >
               <Ionicons name={item.icon as any} size={20} color={item.color} />
             </View>
             <View style={styles.activityContent}>
-              <Text style={[styles.activityTitle, { color: theme.colors.text }]}>{item.title}</Text>
-              <Text style={[styles.activityDesc, { color: theme.colors.textSecondary }]}>{item.desc}</Text>
+              <Text
+                style={[styles.activityTitle, { color: theme.colors.text }]}
+              >
+                {item.title}
+              </Text>
+              <Text
+                style={[
+                  styles.activityDesc,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                {item.desc}
+              </Text>
             </View>
-            <Text style={[styles.activityTime, { color: theme.colors.textSecondary }]}>{item.time}</Text>
+            <Text
+              style={[
+                styles.activityTime,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {item.time}
+            </Text>
           </View>
         ))}
       </View>
@@ -168,13 +335,15 @@ const DashboardScreen = () => {
   const timeToggles = ['Monthly', 'Weekly', 'Today'];
 
   return (
-    <ScreenWrapper 
+    <ScreenWrapper
       style={[styles.container, { backgroundColor: '#F9FAFB' }]}
       safeAreaEdges={['left', 'right']}
     >
       {/* Refined Header */}
       <View style={[styles.cleanHeader, { paddingTop: insets.top + 10 }]}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Dashboard</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+          Dashboard
+        </Text>
         <View style={styles.headerIcons}>
           <TouchableOpacity style={styles.iconCircle}>
             <Ionicons name="moon-outline" size={20} color={theme.colors.text} />
@@ -185,41 +354,45 @@ const DashboardScreen = () => {
         </View>
       </View>
 
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+          />
         }
       >
         {/* Metrics Grid 2x2 */}
         <View style={styles.metricsGrid}>
           <View style={styles.metricsRow}>
-            <StatCard 
+            <StatCard
               variant="dark"
-              title="Total Menus" 
-              value="120" 
+              title="Total Menus"
+              value="120"
               progress={45}
             />
-            <StatCard 
+            <StatCard
               variant="light"
-              title="Total Orders" 
-              value="180" 
+              title="Total Orders"
+              value="180"
               progress={62}
             />
           </View>
           <View style={styles.metricsRow}>
-            <StatCard 
+            <StatCard
               variant="light"
-              title="Total Clients" 
-              value="240" 
+              title="Total Clients"
+              value="240"
               progress={80}
             />
-            <StatCard 
+            <StatCard
               variant="light"
-              title="Revenue" 
-              value="140" 
+              title="Revenue"
+              value="140"
               progress={85}
             />
           </View>
@@ -227,21 +400,29 @@ const DashboardScreen = () => {
 
         {/* Section with Time Toggles */}
         <View style={styles.sectionWithToggles}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Revenue</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Revenue
+          </Text>
           <View style={styles.toggleRow}>
-            {timeToggles.map(tab => (
-              <TouchableOpacity 
-                key={tab} 
+            {timeToggles.map((tab) => (
+              <TouchableOpacity
+                key={tab}
                 onPress={() => setActiveTab(tab)}
                 style={[
-                  styles.toggleBtn, 
-                  activeTab === tab && { backgroundColor: theme.colors.primary }
+                  styles.toggleBtn,
+                  activeTab === tab && {
+                    backgroundColor: theme.colors.primary,
+                  },
                 ]}
               >
-                <Text style={[
-                  styles.toggleText, 
-                  activeTab === tab ? { color: '#FFF' } : { color: theme.colors.textSecondary }
-                ]}>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    activeTab === tab
+                      ? { color: '#FFF' }
+                      : { color: theme.colors.textSecondary },
+                  ]}
+                >
                   {tab}
                 </Text>
               </TouchableOpacity>
@@ -257,23 +438,70 @@ const DashboardScreen = () => {
 
         {/* Quick Access to Main Screens */}
         <View style={styles.quickAccessSection}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text, paddingHorizontal: 0, marginBottom: 12 }]}>Management</Text>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: theme.colors.text,
+                paddingHorizontal: 0,
+                marginBottom: 12,
+              },
+            ]}
+          >
+            Management
+          </Text>
           <View style={styles.managementGrid}>
             {[
-              { title: 'Venues', icon: 'business', screen: 'ServiceManagement', color: '#6366F1' },
-              { title: 'Schedule', icon: 'calendar', screen: 'AllBookings', color: '#10B981' },
-              { title: 'Customers', icon: 'people', screen: 'UserManagement', color: '#F59E0B' },
-              { title: 'Reports', icon: 'bar-chart', screen: 'EarningsReports', color: '#EC4899' },
+              {
+                title: 'Venues',
+                icon: 'business',
+                screen: 'ServiceManagement',
+                color: '#6366F1',
+              },
+              {
+                title: 'Schedule',
+                icon: 'calendar',
+                screen: 'AllBookings',
+                color: '#10B981',
+              },
+              {
+                title: 'Customers',
+                icon: 'people',
+                screen: 'UserManagement',
+                color: '#F59E0B',
+              },
+              {
+                title: 'Reports',
+                icon: 'bar-chart',
+                screen: 'EarningsReports',
+                color: '#EC4899',
+              },
             ].map((item, idx) => (
-              <TouchableOpacity 
-                key={idx} 
-                style={[styles.manageCard, { backgroundColor: theme.colors.card }]}
+              <TouchableOpacity
+                key={idx}
+                style={[
+                  styles.manageCard,
+                  { backgroundColor: theme.colors.card },
+                ]}
                 onPress={() => navigation.navigate(item.screen)}
               >
-                <View style={[styles.manageIcon, { backgroundColor: item.color + '15' }]}>
-                  <Ionicons name={item.icon as any} size={24} color={item.color} />
+                <View
+                  style={[
+                    styles.manageIcon,
+                    { backgroundColor: item.color + '15' },
+                  ]}
+                >
+                  <Ionicons
+                    name={item.icon as any}
+                    size={24}
+                    color={item.color}
+                  />
                 </View>
-                <Text style={[styles.manageTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                <Text
+                  style={[styles.manageTitle, { color: theme.colors.text }]}
+                >
+                  {item.title}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -282,8 +510,6 @@ const DashboardScreen = () => {
     </ScreenWrapper>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {

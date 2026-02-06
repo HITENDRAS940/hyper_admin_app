@@ -15,58 +15,75 @@ interface StatCardProps {
   variant?: 'dark' | 'light';
 }
 
-const StatCard: React.FC<StatCardProps> = ({ 
-  title, 
-  value, 
-  icon, 
-  trend, 
-  trendUp, 
+const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  icon,
+  trend,
+  trendUp,
   onPress,
   color,
   progress,
-  variant = 'light'
+  variant = 'light',
 }) => {
   const { theme } = useTheme();
-  
+
   const isDark = variant === 'dark';
   const bgColor = isDark ? theme.colors.primary : theme.colors.card;
   const textColor = isDark ? '#FFFFFF' : theme.colors.text;
-  const secondaryTextColor = isDark ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary;
+  const secondaryTextColor = isDark
+    ? 'rgba(255,255,255,0.7)'
+    : theme.colors.textSecondary;
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[
-        styles.card, 
-        { 
-          backgroundColor: bgColor, 
+        styles.card,
+        {
+          backgroundColor: bgColor,
           shadowColor: theme.colors.shadow,
           borderWidth: isDark ? 0 : 1,
-          borderColor: theme.colors.border + '50'
-        }
+          borderColor: theme.colors.border + '50',
+        },
       ]}
       onPress={onPress}
       disabled={!onPress}
     >
       <View style={styles.content}>
         <Text style={[styles.value, { color: textColor }]}>{value}</Text>
-        <Text style={[styles.title, { color: secondaryTextColor }]}>{title}</Text>
+        <Text style={[styles.title, { color: secondaryTextColor }]}>
+          {title}
+        </Text>
       </View>
 
       {progress !== undefined && (
         <View style={styles.progressContainer}>
           <View style={styles.progressLabelRow}>
-            <Text style={[styles.progressLabel, { color: secondaryTextColor }]}>0%</Text>
-            <Text style={[styles.progressLabel, { color: secondaryTextColor }]}>{progress}%</Text>
+            <Text style={[styles.progressLabel, { color: secondaryTextColor }]}>
+              0%
+            </Text>
+            <Text style={[styles.progressLabel, { color: secondaryTextColor }]}>
+              {progress}%
+            </Text>
           </View>
-          <View style={[styles.progressBarBg, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : theme.colors.border + '50' }]}>
-            <View 
+          <View
+            style={[
+              styles.progressBarBg,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(255,255,255,0.1)'
+                  : theme.colors.border + '50',
+              },
+            ]}
+          >
+            <View
               style={[
-                styles.progressBarFill, 
-                { 
-                  width: `${progress}%`, 
-                  backgroundColor: isDark ? '#FFFFFF' : theme.colors.secondary 
-                }
-              ]} 
+                styles.progressBarFill,
+                {
+                  width: `${progress}%`,
+                  backgroundColor: isDark ? '#FFFFFF' : theme.colors.secondary,
+                },
+              ]}
             />
           </View>
         </View>
@@ -74,12 +91,17 @@ const StatCard: React.FC<StatCardProps> = ({
 
       {trend && (
         <View style={styles.trendRow}>
-          <Ionicons 
-            name={trendUp ? 'trending-up' : 'trending-down'} 
-            size={12} 
-            color={trendUp ? theme.colors.success : theme.colors.error} 
+          <Ionicons
+            name={trendUp ? 'trending-up' : 'trending-down'}
+            size={12}
+            color={trendUp ? theme.colors.success : theme.colors.error}
           />
-          <Text style={[styles.trendText, { color: trendUp ? theme.colors.success : theme.colors.error }]}>
+          <Text
+            style={[
+              styles.trendText,
+              { color: trendUp ? theme.colors.success : theme.colors.error },
+            ]}
+          >
             {trend}
           </Text>
         </View>

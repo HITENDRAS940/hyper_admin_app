@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { adminAPI } from '../../services/api';
@@ -11,7 +18,7 @@ const OTPVerificationScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<any>();
   const { login } = useAuth();
-  
+
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const email = route.params?.email;
@@ -34,19 +41,26 @@ const OTPVerificationScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Verification</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>
+          Verification
+        </Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
           Enter the OTP sent to {email}
         </Text>
 
         <TextInput
-          style={[styles.input, { 
-            backgroundColor: theme.colors.surface,
-            color: theme.colors.text,
-            borderColor: theme.colors.border
-          }]}
+          style={[
+            styles.input,
+            {
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.text,
+              borderColor: theme.colors.border,
+            },
+          ]}
           placeholder="Enter OTP"
           placeholderTextColor={theme.colors.textSecondary}
           keyboardType="number-pad"
@@ -60,7 +74,9 @@ const OTPVerificationScreen = () => {
           onPress={handleVerifyOtp}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>{loading ? 'Verifying...' : 'Verify OTP'}</Text>
+          <Text style={styles.buttonText}>
+            {loading ? 'Verifying...' : 'Verify OTP'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

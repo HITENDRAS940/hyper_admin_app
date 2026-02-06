@@ -21,7 +21,7 @@ const StatCard: React.FC<StatCardProps> = ({
   subtitle,
 }) => {
   const { theme } = useTheme();
-  
+
   const formatValue = (val: number | string): string => {
     if (typeof val === 'number') {
       return val.toLocaleString();
@@ -30,19 +30,32 @@ const StatCard: React.FC<StatCardProps> = ({
   };
 
   return (
-    <View style={[styles.card, { 
-      backgroundColor,
-      shadowColor: theme.colors.gray 
-    }]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor,
+          shadowColor: theme.colors.gray,
+        },
+      ]}
+    >
       <View style={[styles.iconContainer, { backgroundColor: iconColor }]}>
         <Ionicons name={icon} size={24} color="#FFFFFF" />
       </View>
-      
+
       <View style={styles.content}>
-        <Text style={[styles.value, { color: theme.colors.text }]}>{formatValue(value)}</Text>
-        <Text style={[styles.title, { color: theme.colors.textSecondary }]}>{title}</Text>
+        <Text style={[styles.value, { color: theme.colors.text }]}>
+          {formatValue(value)}
+        </Text>
+        <Text style={[styles.title, { color: theme.colors.textSecondary }]}>
+          {title}
+        </Text>
         {subtitle && (
-          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>{subtitle}</Text>
+          <Text
+            style={[styles.subtitle, { color: theme.colors.textSecondary }]}
+          >
+            {subtitle}
+          </Text>
         )}
       </View>
     </View>

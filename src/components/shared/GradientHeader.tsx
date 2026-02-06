@@ -13,7 +13,12 @@ interface GradientHeaderProps {
   rightElement?: React.ReactNode;
 }
 
-const GradientHeader: React.FC<GradientHeaderProps> = ({ title, subtitle, showBack, rightElement }) => {
+const GradientHeader: React.FC<GradientHeaderProps> = ({
+  title,
+  subtitle,
+  showBack,
+  rightElement,
+}) => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -26,7 +31,10 @@ const GradientHeader: React.FC<GradientHeaderProps> = ({ title, subtitle, showBa
       <View style={styles.content}>
         <View style={styles.leftSection}>
           {showBack && (
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}
+            >
               <Ionicons name="arrow-back" size={24} color="#FFF" />
             </TouchableOpacity>
           )}
@@ -36,9 +44,7 @@ const GradientHeader: React.FC<GradientHeaderProps> = ({ title, subtitle, showBa
           </View>
         </View>
         {rightElement && (
-          <View style={styles.rightSection}>
-            {rightElement}
-          </View>
+          <View style={styles.rightSection}>{rightElement}</View>
         )}
       </View>
     </LinearGradient>

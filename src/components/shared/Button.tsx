@@ -1,5 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface ButtonProps {
@@ -9,12 +14,17 @@ interface ButtonProps {
   loading?: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({ title, onPress, variant = 'primary', loading }) => {
+const Button: React.FC<ButtonProps> = ({
+  title,
+  onPress,
+  variant = 'primary',
+  loading,
+}) => {
   const { theme } = useTheme();
-  
+
   return (
-    <TouchableOpacity 
-      style={[styles.container, { backgroundColor: theme.colors.primary }]} 
+    <TouchableOpacity
+      style={[styles.container, { backgroundColor: theme.colors.primary }]}
       onPress={onPress}
       disabled={loading}
     >

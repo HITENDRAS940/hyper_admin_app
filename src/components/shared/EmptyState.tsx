@@ -13,32 +13,43 @@ interface EmptyStateProps {
   message?: string; // Legacy support
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ 
-  icon = 'document-text-outline', 
-  title, 
-  description, 
-  actionLabel, 
+const EmptyState: React.FC<EmptyStateProps> = ({
+  icon = 'document-text-outline',
+  title,
+  description,
+  actionLabel,
   onAction,
-  message 
+  message,
 }) => {
   const { theme } = useTheme();
 
   return (
     <View style={styles.container}>
-      <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '10' }]}>
-        <Ionicons name={icon as any} size={ms(48)} color={theme.colors.primary} />
+      <View
+        style={[
+          styles.iconContainer,
+          { backgroundColor: theme.colors.primary + '10' },
+        ]}
+      >
+        <Ionicons
+          name={icon as any}
+          size={ms(48)}
+          color={theme.colors.primary}
+        />
       </View>
       <Text style={[styles.title, { color: theme.colors.text }]}>
         {title || message || 'No Data'}
       </Text>
       {description && (
-        <Text style={[styles.description, { color: theme.colors.textSecondary }]}>
+        <Text
+          style={[styles.description, { color: theme.colors.textSecondary }]}
+        >
           {description}
         </Text>
       )}
       {actionLabel && onAction && (
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: theme.colors.primary }]} 
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           onPress={onAction}
           activeOpacity={0.8}
         >

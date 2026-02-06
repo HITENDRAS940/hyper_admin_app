@@ -25,30 +25,55 @@ const BookingCard: React.FC<BookingCardProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  const isAttendancePending = booking.attendanceStatus === 'PENDING' || !booking.attendanceStatus;
+  const isAttendancePending =
+    booking.attendanceStatus === 'PENDING' || !booking.attendanceStatus;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.border,
+        },
+      ]}
+    >
       {/* Header: Customer & Reference */}
       <View style={styles.header}>
         <View style={styles.customerInfo}>
-          <View style={[styles.avatarCircle, { backgroundColor: theme.colors.primary }]}>
-             <Text style={styles.avatarText}>{booking.user?.name?.charAt(0).toUpperCase() || 'G'}</Text>
+          <View
+            style={[
+              styles.avatarCircle,
+              { backgroundColor: theme.colors.primary },
+            ]}
+          >
+            <Text style={styles.avatarText}>
+              {booking.user?.name?.charAt(0).toUpperCase() || 'G'}
+            </Text>
           </View>
           <View style={styles.nameSection}>
-            <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>
+            <Text
+              style={[styles.userName, { color: theme.colors.text }]}
+              numberOfLines={1}
+            >
               {booking.user?.name || 'Guest User'}
             </Text>
             {booking.user?.phone && (
-              <Text style={[styles.phone, { color: theme.colors.textSecondary }]}>
+              <Text
+                style={[styles.phone, { color: theme.colors.textSecondary }]}
+              >
                 {booking.user.phone}
               </Text>
             )}
           </View>
         </View>
         <View style={styles.headerIcons}>
-          <View style={[styles.iconCircle, { borderColor: theme.colors.border }]}>
-            <Text style={[styles.refCode, { color: theme.colors.textSecondary }]}>
+          <View
+            style={[styles.iconCircle, { borderColor: theme.colors.border }]}
+          >
+            <Text
+              style={[styles.refCode, { color: theme.colors.textSecondary }]}
+            >
               #{booking.reference.slice(-4)}
             </Text>
           </View>
@@ -56,53 +81,129 @@ const BookingCard: React.FC<BookingCardProps> = ({
         </View>
       </View>
 
-      <View style={[styles.divider, { backgroundColor: theme.colors.border + '50' }]} />
+      <View
+        style={[
+          styles.divider,
+          { backgroundColor: theme.colors.border + '50' },
+        ]}
+      />
 
       {/* Details Grid */}
       <View style={styles.detailsGrid}>
         <View style={styles.detailItem}>
-          <Ionicons name="calendar-outline" size={14} color={theme.colors.primary} />
+          <Ionicons
+            name="calendar-outline"
+            size={14}
+            color={theme.colors.primary}
+          />
           <Text style={[styles.detailText, { color: theme.colors.text }]}>
             {format(new Date(booking.bookingDate), 'MMM dd, yyyy')}
           </Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="time-outline" size={14} color={theme.colors.primary} />
-          <Text style={[styles.detailText, { color: theme.colors.text }]}>{booking.startTime} - {booking.endTime}</Text>
+          <Ionicons
+            name="time-outline"
+            size={14}
+            color={theme.colors.primary}
+          />
+          <Text style={[styles.detailText, { color: theme.colors.text }]}>
+            {booking.startTime} - {booking.endTime}
+          </Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="business-outline" size={14} color={theme.colors.primary} />
-          <Text style={[styles.detailText, { color: theme.colors.text }]} numberOfLines={1}>{booking.resourceName}</Text>
+          <Ionicons
+            name="business-outline"
+            size={14}
+            color={theme.colors.primary}
+          />
+          <Text
+            style={[styles.detailText, { color: theme.colors.text }]}
+            numberOfLines={1}
+          >
+            {booking.resourceName}
+          </Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="card-outline" size={14} color={theme.colors.primary} />
-          <Text style={[styles.detailText, { color: theme.colors.secondary, fontWeight: '700' }]}>
-            {booking.amountBreakdown.currency} {booking.amountBreakdown.totalAmount.toFixed(0)}
+          <Ionicons
+            name="card-outline"
+            size={14}
+            color={theme.colors.primary}
+          />
+          <Text
+            style={[
+              styles.detailText,
+              { color: theme.colors.secondary, fontWeight: '700' },
+            ]}
+          >
+            {booking.amountBreakdown.currency}{' '}
+            {booking.amountBreakdown.totalAmount.toFixed(0)}
           </Text>
         </View>
       </View>
 
       <View style={styles.metaRow}>
-        <View style={[styles.typeBadge, { backgroundColor: (booking.bookingType === 'ONLINE' || !booking.bookingType) ? '#6366F115' : '#10B98115' }]}>
-          <Text style={[styles.typeText, { color: (booking.bookingType === 'ONLINE' || !booking.bookingType) ? '#6366F1' : '#10B981' }]}>
+        <View
+          style={[
+            styles.typeBadge,
+            {
+              backgroundColor:
+                booking.bookingType === 'ONLINE' || !booking.bookingType
+                  ? '#6366F115'
+                  : '#10B98115',
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.typeText,
+              {
+                color:
+                  booking.bookingType === 'ONLINE' || !booking.bookingType
+                    ? '#6366F1'
+                    : '#10B981',
+              },
+            ]}
+          >
             {booking.bookingType || 'ONLINE'}
           </Text>
         </View>
         <Text style={[styles.createdAt, { color: theme.colors.textSecondary }]}>
-          {booking.createdAt ? format(new Date(booking.createdAt), 'MMM dd, HH:mm') : 'N/A'}
+          {booking.createdAt
+            ? format(new Date(booking.createdAt), 'MMM dd, HH:mm')
+            : 'N/A'}
         </Text>
       </View>
 
       {/* Attendance Status (Special Highlight) */}
       {booking.status.toUpperCase() === 'CONFIRMED' && (
-        <View style={[styles.attendanceSection, { backgroundColor: theme.colors.primary + '05' }]}>
-          <Text style={[styles.attendanceLabel, { color: theme.colors.textSecondary }]}>Attendance:</Text>
+        <View
+          style={[
+            styles.attendanceSection,
+            { backgroundColor: theme.colors.primary + '05' },
+          ]}
+        >
+          <Text
+            style={[
+              styles.attendanceLabel,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            Attendance:
+          </Text>
           <View style={styles.attendanceValue}>
-            <Text style={[styles.attendanceStatusText, { 
-              color: booking.attendanceStatus === 'CHECKED_IN' ? theme.colors.success : 
-                     booking.attendanceStatus === 'NO_SHOW' ? theme.colors.error : 
-                     theme.colors.textSecondary 
-            }]}>
+            <Text
+              style={[
+                styles.attendanceStatusText,
+                {
+                  color:
+                    booking.attendanceStatus === 'CHECKED_IN'
+                      ? theme.colors.success
+                      : booking.attendanceStatus === 'NO_SHOW'
+                        ? theme.colors.error
+                        : theme.colors.textSecondary,
+                },
+              ]}
+            >
               {booking.attendanceStatus || 'PENDING'}
             </Text>
           </View>
@@ -111,42 +212,80 @@ const BookingCard: React.FC<BookingCardProps> = ({
 
       {/* Actions */}
       <View style={styles.actionsContainer}>
-        {booking.status.toUpperCase() === 'CONFIRMED' && isAttendancePending && (
-          <>
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: theme.colors.success + '15' }]} 
-              onPress={() => onCheckIn?.(booking)}
-            >
-              <Ionicons name="checkbox" size={16} color={theme.colors.success} />
-              <Text style={[styles.actionText, { color: theme.colors.success }]}>Check In</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: theme.colors.error + '15' }]} 
-              onPress={() => onNoShow?.(booking)}
-            >
-              <Ionicons name="close-circle" size={16} color={theme.colors.error} />
-              <Text style={[styles.actionText, { color: theme.colors.error }]}>No Show</Text>
-            </TouchableOpacity>
-          </>
-        )}
-        
+        {booking.status.toUpperCase() === 'CONFIRMED' &&
+          isAttendancePending && (
+            <>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: theme.colors.success + '15' },
+                ]}
+                onPress={() => onCheckIn?.(booking)}
+              >
+                <Ionicons
+                  name="checkbox"
+                  size={16}
+                  color={theme.colors.success}
+                />
+                <Text
+                  style={[styles.actionText, { color: theme.colors.success }]}
+                >
+                  Check In
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: theme.colors.error + '15' },
+                ]}
+                onPress={() => onNoShow?.(booking)}
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={16}
+                  color={theme.colors.error}
+                />
+                <Text
+                  style={[styles.actionText, { color: theme.colors.error }]}
+                >
+                  No Show
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+
         {booking.status.toUpperCase() === 'CONFIRMED' && (
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: theme.colors.primary + '15' }]} 
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: theme.colors.primary + '15' },
+            ]}
             onPress={() => onReschedule?.(booking)}
           >
             <Ionicons name="calendar" size={16} color={theme.colors.primary} />
-            <Text style={[styles.actionText, { color: theme.colors.primary }]}>Shift</Text>
+            <Text style={[styles.actionText, { color: theme.colors.primary }]}>
+              Shift
+            </Text>
           </TouchableOpacity>
         )}
 
-        {(booking.status.toUpperCase() === 'CONFIRMED' || booking.status.toUpperCase() === 'PENDING') && (
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: theme.colors.error + '10' }]} 
+        {(booking.status.toUpperCase() === 'CONFIRMED' ||
+          booking.status.toUpperCase() === 'PENDING') && (
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              { backgroundColor: theme.colors.error + '10' },
+            ]}
             onPress={() => onCancel?.(booking)}
           >
-            <Ionicons name="trash-outline" size={16} color={theme.colors.error} />
-            <Text style={[styles.actionText, { color: theme.colors.error }]}>Cancel</Text>
+            <Ionicons
+              name="trash-outline"
+              size={16}
+              color={theme.colors.error}
+            />
+            <Text style={[styles.actionText, { color: theme.colors.error }]}>
+              Cancel
+            </Text>
           </TouchableOpacity>
         )}
       </View>

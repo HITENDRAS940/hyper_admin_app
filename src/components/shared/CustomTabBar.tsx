@@ -1,26 +1,41 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  Platform,
+} from 'react-native';
 import { ScaledSheet, ms, vs, s } from 'react-native-size-matters';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  withSpring,
+} from 'react-native-reanimated';
 import ProfileIcon from './icons/ProfileIcon';
 
 const { width } = Dimensions.get('window');
 
-const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+const CustomTabBar: React.FC<BottomTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+}) => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
   const focusedRoute = state.routes[state.index];
   const focusedOptions = descriptors[focusedRoute.key].options;
-  
+
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(1);
   const isHidden = (focusedOptions as any)?.tabBarStyle?.display === 'none';
-  
+
   React.useEffect(() => {
     if (isHidden) {
       translateY.value = withTiming(100, { duration: 300 });
@@ -44,13 +59,37 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 
     switch (routeName) {
       case 'DASHBOARD':
-        return <Ionicons name={isFocused ? 'grid' : 'grid-outline'} size={size} color={color} />;
+        return (
+          <Ionicons
+            name={isFocused ? 'grid' : 'grid-outline'}
+            size={size}
+            color={color}
+          />
+        );
       case 'BOOKING MANAGEMENT':
-        return <Ionicons name={isFocused ? 'calendar' : 'calendar-outline'} size={size} color={color} />;
+        return (
+          <Ionicons
+            name={isFocused ? 'calendar' : 'calendar-outline'}
+            size={size}
+            color={color}
+          />
+        );
       case 'SLOT MANAGEMENT':
-        return <Ionicons name={isFocused ? 'time' : 'time-outline'} size={size} color={color} />;
+        return (
+          <Ionicons
+            name={isFocused ? 'time' : 'time-outline'}
+            size={size}
+            color={color}
+          />
+        );
       case 'EARNINGS AND REPORTS':
-        return <Ionicons name={isFocused ? 'stats-chart' : 'stats-chart-outline'} size={size} color={color} />;
+        return (
+          <Ionicons
+            name={isFocused ? 'stats-chart' : 'stats-chart-outline'}
+            size={size}
+            color={color}
+          />
+        );
       case 'VENUE PROFILE':
         return <ProfileIcon color={color} size={size} />;
       default:
@@ -60,33 +99,41 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 
   const getLabel = (routeName: string) => {
     switch (routeName) {
-      case 'DASHBOARD': return 'Home';
-      case 'BOOKING MANAGEMENT': return 'Bookings';
-      case 'SLOT MANAGEMENT': return 'Slots';
-      case 'EARNINGS AND REPORTS': return 'Reports';
-      case 'VENUE PROFILE': return 'Profile';
-      default: return routeName;
+      case 'DASHBOARD':
+        return 'Home';
+      case 'BOOKING MANAGEMENT':
+        return 'Bookings';
+      case 'SLOT MANAGEMENT':
+        return 'Slots';
+      case 'EARNINGS AND REPORTS':
+        return 'Reports';
+      case 'VENUE PROFILE':
+        return 'Profile';
+      default:
+        return routeName;
     }
   };
 
   return (
-    <Animated.View 
+    <Animated.View
       style={[
-        styles.container, 
-        { 
+        styles.container,
+        {
           paddingBottom: Math.max(insets.bottom, vs(15)),
-        }, 
-        animatedStyle
+        },
+        animatedStyle,
       ]}
       pointerEvents={isHidden ? 'none' : 'auto'}
     >
-      <View style={[
-        styles.tabBar, 
-        { 
-          backgroundColor: theme.colors.surface, 
-          shadowColor: theme.colors.shadow,
-        }
-      ]}>
+      <View
+        style={[
+          styles.tabBar,
+          {
+            backgroundColor: theme.colors.surface,
+            shadowColor: theme.colors.shadow,
+          },
+        ]}
+      >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const isFocused = state.index === index;
@@ -114,21 +161,28 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
             >
               <View style={styles.tabItemContent}>
                 {getIcon(route.name, isFocused)}
-                <Text 
+                <Text
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   style={[
-                    styles.label, 
-                    { 
-                      color: isFocused ? theme.colors.secondary : theme.colors.gray,
+                    styles.label,
+                    {
+                      color: isFocused
+                        ? theme.colors.secondary
+                        : theme.colors.gray,
                       fontWeight: isFocused ? '700' : '500',
-                    }
+                    },
                   ]}
                 >
                   {getLabel(route.name)}
                 </Text>
                 {isFocused && (
-                  <View style={[styles.activeIndicator, { backgroundColor: theme.colors.secondary }]} />
+                  <View
+                    style={[
+                      styles.activeIndicator,
+                      { backgroundColor: theme.colors.secondary },
+                    ]}
+                  />
                 )}
               </View>
             </TouchableOpacity>
@@ -187,4 +241,3 @@ const styles = ScaledSheet.create({
 });
 
 export default CustomTabBar;
-

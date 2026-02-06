@@ -20,19 +20,26 @@ interface SlotGridCardProps {
   onSlotPress?: (slot: ServiceSlot) => void;
 }
 
-const SlotGridCard: React.FC<SlotGridCardProps> = ({ 
-  slots, 
-  bookedSlotIds, 
+const SlotGridCard: React.FC<SlotGridCardProps> = ({
+  slots,
+  bookedSlotIds,
   disabledSlotIds,
-  onSlotPress 
+  onSlotPress,
 }) => {
   const { theme } = useTheme();
 
   const getSlotStatus = (slot: ServiceSlot) => {
-    if (bookedSlotIds.includes(Number(slot.slotId)) || bookedSlotIds.includes(Number(slot.id))) {
+    if (
+      bookedSlotIds.includes(Number(slot.slotId)) ||
+      bookedSlotIds.includes(Number(slot.id))
+    ) {
       return 'booked';
     }
-    if (disabledSlotIds.includes(Number(slot.slotId)) || disabledSlotIds.includes(Number(slot.id)) || !slot.enabled) {
+    if (
+      disabledSlotIds.includes(Number(slot.slotId)) ||
+      disabledSlotIds.includes(Number(slot.id)) ||
+      !slot.enabled
+    ) {
       return 'disabled';
     }
     return 'available';
@@ -40,9 +47,12 @@ const SlotGridCard: React.FC<SlotGridCardProps> = ({
 
   const getStatusColor = (status: 'booked' | 'disabled' | 'available') => {
     switch (status) {
-      case 'booked': return '#EF4444'; // Red
-      case 'disabled': return '#94A3B8'; // Grey
-      case 'available': return '#10B981'; // Green
+      case 'booked':
+        return '#EF4444'; // Red
+      case 'disabled':
+        return '#94A3B8'; // Grey
+      case 'available':
+        return '#10B981'; // Green
     }
   };
 
@@ -51,7 +61,10 @@ const SlotGridCard: React.FC<SlotGridCardProps> = ({
     if (!time) return '';
     if (time.includes('T')) {
       const date = new Date(time);
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
     return time;
   };
@@ -62,13 +75,16 @@ const SlotGridCard: React.FC<SlotGridCardProps> = ({
         {slots.map((slot, index) => {
           const status = getSlotStatus(slot);
           const statusColor = getStatusColor(status);
-          
+
           return (
             <TouchableOpacity
               key={slot.id || index}
               style={[
                 styles.slotItem,
-                { borderColor: statusColor + '40', backgroundColor: statusColor + '10' }
+                {
+                  borderColor: statusColor + '40',
+                  backgroundColor: statusColor + '10',
+                },
               ]}
               onPress={() => onSlotPress?.(slot)}
               activeOpacity={0.7}
@@ -76,8 +92,15 @@ const SlotGridCard: React.FC<SlotGridCardProps> = ({
               <Text style={[styles.timeText, { color: statusColor }]}>
                 {formatTime(slot.startTime)}
               </Text>
-              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-              <Text style={[styles.priceText, { color: theme.colors.textSecondary }]}>
+              <View
+                style={[styles.statusDot, { backgroundColor: statusColor }]}
+              />
+              <Text
+                style={[
+                  styles.priceText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 ₹{slot.price}
               </Text>
             </TouchableOpacity>
@@ -89,15 +112,27 @@ const SlotGridCard: React.FC<SlotGridCardProps> = ({
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: '#10B981' }]} />
-          <Text style={[styles.legendText, { color: theme.colors.textSecondary }]}>Available</Text>
+          <Text
+            style={[styles.legendText, { color: theme.colors.textSecondary }]}
+          >
+            Available
+          </Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-          <Text style={[styles.legendText, { color: theme.colors.textSecondary }]}>Booked</Text>
+          <Text
+            style={[styles.legendText, { color: theme.colors.textSecondary }]}
+          >
+            Booked
+          </Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: '#94A3B8' }]} />
-          <Text style={[styles.legendText, { color: theme.colors.textSecondary }]}>Blocked</Text>
+          <Text
+            style={[styles.legendText, { color: theme.colors.textSecondary }]}
+          >
+            Blocked
+          </Text>
         </View>
       </View>
     </View>

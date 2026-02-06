@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Switch, ActivityIndicator, Alert } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Switch,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,56 +49,101 @@ const AvailabilityModal: React.FC<AvailabilityModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <View style={styles.overlay}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+        <View
+          style={[styles.modalContent, { backgroundColor: theme.colors.card }]}
+        >
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>Service Availability</Text>
+            <Text style={[styles.title, { color: theme.colors.text }]}>
+              Service Availability
+            </Text>
             <TouchableOpacity onPress={onClose} disabled={loading}>
-              <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              <Ionicons
+                name="close"
+                size={24}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
           <View style={styles.body}>
-            <Text style={[styles.serviceName, { color: theme.colors.primary }]}>{serviceName}</Text>
-            
-            <View style={[styles.statusContainer, { backgroundColor: theme.colors.background }]}>
+            <Text style={[styles.serviceName, { color: theme.colors.primary }]}>
+              {serviceName}
+            </Text>
+
+            <View
+              style={[
+                styles.statusContainer,
+                { backgroundColor: theme.colors.background },
+              ]}
+            >
               <View>
-                <Text style={[styles.statusTitle, { color: theme.colors.text }]}>
+                <Text
+                  style={[styles.statusTitle, { color: theme.colors.text }]}
+                >
                   {isAvailable ? 'Online & Bookable' : 'Offline / Private'}
                 </Text>
-                <Text style={[styles.statusSubtitle, { color: theme.colors.textSecondary }]}>
-                  {isAvailable 
-                    ? 'Users can see and book slots' 
+                <Text
+                  style={[
+                    styles.statusSubtitle,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {isAvailable
+                    ? 'Users can see and book slots'
                     : 'Service is hidden from search'}
                 </Text>
               </View>
               <Switch
                 value={isAvailable}
                 onValueChange={setIsAvailable}
-                trackColor={{ false: '#CBD5E1', true: theme.colors.primary + '80' }}
+                trackColor={{
+                  false: '#CBD5E1',
+                  true: theme.colors.primary + '80',
+                }}
                 thumbColor={isAvailable ? theme.colors.primary : '#F8FAFC'}
                 disabled={loading}
               />
             </View>
 
-            <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>
-              <Ionicons name="information-circle-outline" size={14} /> 
+            <Text
+              style={[styles.infoText, { color: theme.colors.textSecondary }]}
+            >
+              <Ionicons name="information-circle-outline" size={14} />
               Changes will manifest immediately for all users.
             </Text>
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity 
-              style={[styles.cancelButton, { borderColor: theme.colors.border }]} 
+            <TouchableOpacity
+              style={[
+                styles.cancelButton,
+                { borderColor: theme.colors.border },
+              ]}
               onPress={onClose}
               disabled={loading}
             >
-              <Text style={[styles.cancelText, { color: theme.colors.textSecondary }]}>Cancel</Text>
+              <Text
+                style={[
+                  styles.cancelText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Cancel
+              </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.saveButton, { backgroundColor: theme.colors.primary }]} 
+
+            <TouchableOpacity
+              style={[
+                styles.saveButton,
+                { backgroundColor: theme.colors.primary },
+              ]}
               onPress={handleSave}
               disabled={loading}
             >

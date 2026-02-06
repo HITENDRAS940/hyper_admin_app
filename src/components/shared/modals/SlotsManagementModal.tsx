@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Modal, View, Text, StyleSheet, TouchableOpacity, 
-  FlatList, TextInput, Switch, ActivityIndicator, Alert 
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  TextInput,
+  Switch,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -46,13 +54,15 @@ const SlotsManagementModal: React.FC<SlotsManagementModalProps> = ({
   }, [slots, visible]);
 
   const handleUpdateSlot = (id: number, updates: Partial<ServiceSlot>) => {
-    setLocalSlots(prev => prev.map(slot => {
-      if (slot.id === id || slot.slotId === id) {
-        setChangedSlotIds(prevSet => new Set(prevSet).add(id));
-        return { ...slot, ...updates };
-      }
-      return slot;
-    }));
+    setLocalSlots((prev) =>
+      prev.map((slot) => {
+        if (slot.id === id || slot.slotId === id) {
+          setChangedSlotIds((prevSet) => new Set(prevSet).add(id));
+          return { ...slot, ...updates };
+        }
+        return slot;
+      }),
+    );
   };
 
   const handleSave = async () => {
@@ -63,10 +73,11 @@ const SlotsManagementModal: React.FC<SlotsManagementModalProps> = ({
       }
 
       setSaving(true);
-      const updatedSlots = localSlots.filter(slot => 
-        changedSlotIds.has(slot.id) || changedSlotIds.has(slot.slotId)
+      const updatedSlots = localSlots.filter(
+        (slot) =>
+          changedSlotIds.has(slot.id) || changedSlotIds.has(slot.slotId),
       );
-      
+
       await onSave(updatedSlots);
       onClose();
     } catch (error: any) {
@@ -79,34 +90,57 @@ const SlotsManagementModal: React.FC<SlotsManagementModalProps> = ({
   const formatTime = (time: string) => {
     if (!time) return '';
     if (time.includes('T')) {
-      return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return new Date(time).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
     return time;
   };
 
   const renderSlotItem = ({ item }: { item: ServiceSlot }) => (
-    <View style={[styles.slotItem, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.slotItem, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.slotInfo}>
         <Text style={[styles.slotTime, { color: theme.colors.text }]}>
           {formatTime(item.startTime)} - {formatTime(item.endTime)}
         </Text>
-        <Text style={[styles.slotId, { color: theme.colors.textSecondary }]}>ID: {item.slotId || item.id}</Text>
+        <Text style={[styles.slotId, { color: theme.colors.textSecondary }]}>
+          ID: {item.slotId || item.id}
+        </Text>
       </View>
 
       <View style={styles.slotActions}>
         <View style={styles.priceInputContainer}>
-          <Text style={[styles.currencyLabel, { color: theme.colors.textSecondary }]}>₹</Text>
+          <Text
+            style={[
+              styles.currencyLabel,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            ₹
+          </Text>
           <TextInput
-            style={[styles.priceInput, { color: theme.colors.text, borderColor: theme.colors.border }]}
+            style={[
+              styles.priceInput,
+              { color: theme.colors.text, borderColor: theme.colors.border },
+            ]}
             value={item.price.toString()}
             keyboardType="numeric"
-            onChangeText={(val) => handleUpdateSlot(item.id || item.slotId, { price: parseFloat(val) || 0 })}
+            onChangeText={(val) =>
+              handleUpdateSlot(item.id || item.slotId, {
+                price: parseFloat(val) || 0,
+              })
+            }
           />
         </View>
 
         <Switch
           value={item.enabled}
-          onValueChange={(val) => handleUpdateSlot(item.id || item.slotId, { enabled: val })}
+          onValueChange={(val) =>
+            handleUpdateSlot(item.id || item.slotId, { enabled: val })
+          }
           trackColor={{ false: '#CBD5E1', true: theme.colors.primary + '80' }}
           thumbColor={item.enabled ? theme.colors.primary : '#F8FAFC'}
         />
@@ -115,22 +149,43 @@ const SlotsManagementModal: React.FC<SlotsManagementModalProps> = ({
   );
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <View style={styles.overlay}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+        <View
+          style={[styles.modalContent, { backgroundColor: theme.colors.card }]}
+        >
           <View style={styles.header}>
             <View>
-              <Text style={[styles.title, { color: theme.colors.text }]}>Manage Slots</Text>
-              <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>{serviceName}</Text>
+              <Text style={[styles.title, { color: theme.colors.text }]}>
+                Manage Slots
+              </Text>
+              <Text
+                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
+              >
+                {serviceName}
+              </Text>
             </View>
             <View style={styles.headerRight}>
               {onRefresh && (
                 <TouchableOpacity onPress={onRefresh} style={styles.iconButton}>
-                  <Ionicons name="refresh" size={20} color={theme.colors.primary} />
+                  <Ionicons
+                    name="refresh"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
                 </TouchableOpacity>
               )}
               <TouchableOpacity onPress={onClose} style={styles.iconButton}>
-                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -142,26 +197,38 @@ const SlotsManagementModal: React.FC<SlotsManagementModalProps> = ({
           ) : (
             <FlatList
               data={localSlots}
-              keyExtractor={(item, index) => (item.id || item.slotId || index).toString()}
+              keyExtractor={(item, index) =>
+                (item.id || item.slotId || index).toString()
+              }
               renderItem={renderSlotItem}
               contentContainerStyle={styles.listContent}
               ListEmptyComponent={
                 <View style={styles.center}>
-                  <Text style={{ color: theme.colors.textSecondary }}>No slots configured</Text>
+                  <Text style={{ color: theme.colors.textSecondary }}>
+                    No slots configured
+                  </Text>
                 </View>
               }
             />
           )}
 
           <View style={styles.footer}>
-            <Text style={[styles.changeCount, { color: theme.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.changeCount,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               {changedSlotIds.size} change(s) pending
             </Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.saveButton, 
-                { backgroundColor: changedSlotIds.size > 0 ? theme.colors.primary : '#CBD5E1' }
-              ]} 
+                styles.saveButton,
+                {
+                  backgroundColor:
+                    changedSlotIds.size > 0 ? theme.colors.primary : '#CBD5E1',
+                },
+              ]}
               onPress={handleSave}
               disabled={saving || changedSlotIds.size === 0}
             >

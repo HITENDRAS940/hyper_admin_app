@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Modal, View, Text, StyleSheet, TouchableOpacity, 
-  FlatList, ActivityIndicator, Alert 
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -46,19 +52,26 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
   }, [visible]);
 
   const toggleSlot = (id: number) => {
-    setSelectedSlotIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    setSelectedSlotIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
   const isSlotDisabled = (slot: ServiceSlot) => {
     const id = slot.slotId || slot.id;
-    return bookedSlotIds.includes(id) || disabledSlotIds.includes(id) || !slot.enabled;
+    return (
+      bookedSlotIds.includes(id) ||
+      disabledSlotIds.includes(id) ||
+      !slot.enabled
+    );
   };
 
   const handleConfirm = async () => {
     if (selectedSlotIds.length === 0) {
-      Alert.alert('Selection Required', 'Please select at least one slot to book.');
+      Alert.alert(
+        'Selection Required',
+        'Please select at least one slot to book.',
+      );
       return;
     }
 
@@ -76,45 +89,67 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
   const formatTime = (time: string) => {
     if (!time) return '';
     if (time.includes('T')) {
-      return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return new Date(time).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
     return time;
   };
 
   const totalPrice = slots
-    .filter(s => selectedSlotIds.includes(s.slotId || s.id))
+    .filter((s) => selectedSlotIds.includes(s.slotId || s.id))
     .reduce((sum, s) => sum + (s.price || 0), 0);
 
   const renderSlotItem = ({ item }: { item: ServiceSlot }) => {
     const id = item.slotId || item.id;
     const isSelected = selectedSlotIds.includes(id);
     const isDisabled = isSlotDisabled(item);
-    
+
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
-          styles.slotItem, 
-          { 
-            backgroundColor: isSelected ? theme.colors.primary + '15' : theme.colors.background,
-            borderColor: isSelected ? theme.colors.primary : theme.colors.border,
-            opacity: isDisabled ? 0.5 : 1
-          }
+          styles.slotItem,
+          {
+            backgroundColor: isSelected
+              ? theme.colors.primary + '15'
+              : theme.colors.background,
+            borderColor: isSelected
+              ? theme.colors.primary
+              : theme.colors.border,
+            opacity: isDisabled ? 0.5 : 1,
+          },
         ]}
         onPress={() => !isDisabled && toggleSlot(id)}
         disabled={isDisabled}
       >
-        <Text style={[styles.slotTime, { color: isSelected ? theme.colors.primary : theme.colors.text }]}>
+        <Text
+          style={[
+            styles.slotTime,
+            { color: isSelected ? theme.colors.primary : theme.colors.text },
+          ]}
+        >
           {formatTime(item.startTime)}
         </Text>
-        <Text style={[styles.slotPrice, { color: theme.colors.textSecondary }]}>₹{item.price}</Text>
+        <Text style={[styles.slotPrice, { color: theme.colors.textSecondary }]}>
+          ₹{item.price}
+        </Text>
         {isSelected && (
           <View style={styles.checkBadge}>
-            <Ionicons name="checkmark-circle" size={16} color={theme.colors.primary} />
+            <Ionicons
+              name="checkmark-circle"
+              size={16}
+              color={theme.colors.primary}
+            />
           </View>
         )}
         {isDisabled && (
           <View style={styles.lockBadge}>
-            <Ionicons name="lock-closed" size={12} color={theme.colors.textSecondary} />
+            <Ionicons
+              name="lock-closed"
+              size={12}
+              color={theme.colors.textSecondary}
+            />
           </View>
         )}
       </TouchableOpacity>
@@ -122,37 +157,78 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <View style={styles.overlay}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+        <View
+          style={[styles.modalContent, { backgroundColor: theme.colors.card }]}
+        >
           <View style={styles.header}>
             <View>
-              <Text style={[styles.title, { color: theme.colors.text }]}>Manual Offline Booking</Text>
-              <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+              <Text style={[styles.title, { color: theme.colors.text }]}>
+                Manual Offline Booking
+              </Text>
+              <Text
+                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
+              >
                 {serviceName} • {selectedDate}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              <Ionicons
+                name="close"
+                size={24}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
           <View style={styles.body}>
             <View style={styles.summaryBox}>
               <View style={styles.summaryItem}>
-                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Selected Slots</Text>
-                <Text style={[styles.summaryValue, { color: theme.colors.text }]}>{selectedSlotIds.length}</Text>
+                <Text
+                  style={[
+                    styles.summaryLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  Selected Slots
+                </Text>
+                <Text
+                  style={[styles.summaryValue, { color: theme.colors.text }]}
+                >
+                  {selectedSlotIds.length}
+                </Text>
               </View>
               <View style={styles.summaryItem}>
-                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Total Price</Text>
-                <Text style={[styles.summaryValue, { color: theme.colors.primary }]}>₹{totalPrice}</Text>
+                <Text
+                  style={[
+                    styles.summaryLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  Total Price
+                </Text>
+                <Text
+                  style={[styles.summaryValue, { color: theme.colors.primary }]}
+                >
+                  ₹{totalPrice}
+                </Text>
               </View>
             </View>
 
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Select Time Slots</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              Select Time Slots
+            </Text>
             <FlatList
               data={slots}
-              keyExtractor={(item, index) => (item.id || item.slotId || index).toString()}
+              keyExtractor={(item, index) =>
+                (item.id || item.slotId || index).toString()
+              }
               renderItem={renderSlotItem}
               numColumns={3}
               contentContainerStyle={styles.listContent}
@@ -161,19 +237,34 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity 
-              style={[styles.cancelButton, { borderColor: theme.colors.border }]} 
+            <TouchableOpacity
+              style={[
+                styles.cancelButton,
+                { borderColor: theme.colors.border },
+              ]}
               onPress={onClose}
               disabled={saving}
             >
-              <Text style={[styles.cancelText, { color: theme.colors.textSecondary }]}>Cancel</Text>
+              <Text
+                style={[
+                  styles.cancelText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Cancel
+              </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[
-                styles.confirmButton, 
-                { backgroundColor: selectedSlotIds.length > 0 ? theme.colors.primary : '#CBD5E1' }
-              ]} 
+                styles.confirmButton,
+                {
+                  backgroundColor:
+                    selectedSlotIds.length > 0
+                      ? theme.colors.primary
+                      : '#CBD5E1',
+                },
+              ]}
               onPress={handleConfirm}
               disabled={saving || selectedSlotIds.length === 0}
             >

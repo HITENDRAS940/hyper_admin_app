@@ -13,7 +13,12 @@ import {
 import { s, vs, ms } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Service, ArenaAmenity, OperatingHours, SportPricing } from '../../types';
+import {
+  Service,
+  ArenaAmenity,
+  OperatingHours,
+  SportPricing,
+} from '../../types';
 import Button from '../shared/Button';
 
 interface ArenaSettingsTabProps {
@@ -22,7 +27,15 @@ interface ArenaSettingsTabProps {
   loading?: boolean;
 }
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const DAYS = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
 
 const DEFAULT_AMENITIES: ArenaAmenity[] = [
   { id: '1', name: 'Lights', icon: 'flashlight', available: false },
@@ -37,47 +50,68 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
   loading = false,
 }) => {
   const { theme } = useTheme();
-  
+
   // Form State
   const [name, setName] = useState(service?.name || '');
-  const [contactNumber, setContactNumber] = useState(service?.contactNumber || '');
-  const [googleMapsLink, setGoogleMapsLink] = useState(service?.googleMapsLink || '');
+  const [contactNumber, setContactNumber] = useState(
+    service?.contactNumber || '',
+  );
+  const [googleMapsLink, setGoogleMapsLink] = useState(
+    service?.googleMapsLink || '',
+  );
   const [photos, setPhotos] = useState<string[]>(service?.photos || []);
   const [amenities, setAmenities] = useState<ArenaAmenity[]>(
-    service?.amenities || DEFAULT_AMENITIES
+    service?.amenities || DEFAULT_AMENITIES,
   );
   const [operatingHours, setOperatingHours] = useState<OperatingHours[]>(
-    service?.operatingHours || DAYS.map(day => ({ day, open: '09:00', close: '22:00', isClosed: false }))
+    service?.operatingHours ||
+      DAYS.map((day) => ({
+        day,
+        open: '09:00',
+        close: '22:00',
+        isClosed: false,
+      })),
   );
   const [pricingBySport, setPricingBySport] = useState<SportPricing[]>(
-    service?.pricingBySport || (service?.sports || []).map(sport => ({ sport, pricePerHour: service?.price || 0 }))
+    service?.pricingBySport ||
+      (service?.sports || []).map((sport) => ({
+        sport,
+        pricePerHour: service?.price || 0,
+      })),
   );
-  const [cancellationPolicy, setCancellationPolicy] = useState(service?.cancellationPolicy || '');
+  const [cancellationPolicy, setCancellationPolicy] = useState(
+    service?.cancellationPolicy || '',
+  );
 
   const handleToggleAmenity = (id: string) => {
-    setAmenities(prev => prev.map(a => 
-      a.id === id ? { ...a, available: !a.available } : a
-    ));
+    setAmenities((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, available: !a.available } : a)),
+    );
   };
 
-  const handleUpdateHours = (dayIndex: number, updates: Partial<OperatingHours>) => {
-    setOperatingHours(prev => prev.map((h, i) => 
-      i === dayIndex ? { ...h, ...updates } : h
-    ));
+  const handleUpdateHours = (
+    dayIndex: number,
+    updates: Partial<OperatingHours>,
+  ) => {
+    setOperatingHours((prev) =>
+      prev.map((h, i) => (i === dayIndex ? { ...h, ...updates } : h)),
+    );
   };
 
   const handleUpdatePricing = (sport: string, price: string) => {
     const numPrice = parseFloat(price) || 0;
-    setPricingBySport((prev: SportPricing[]) => prev.map((p: SportPricing) => 
-      p.sport === sport ? { ...p, pricePerHour: numPrice } : p
-    ));
+    setPricingBySport((prev: SportPricing[]) =>
+      prev.map((p: SportPricing) =>
+        p.sport === sport ? { ...p, pricePerHour: numPrice } : p,
+      ),
+    );
   };
 
   const handleSave = async () => {
     if (photos.length < 5) {
       // Alert.alert('Warning', 'Minimum 5 photos are recommended for better visibility.');
     }
-    
+
     await onSave({
       name,
       contactNumber,
@@ -93,20 +127,30 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
   const renderSectionHeader = (title: string, icon: string) => (
     <View style={styles.sectionHeader}>
       <Ionicons name={icon as any} size={20} color={theme.colors.primary} />
-      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{title}</Text>
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+        {title}
+      </Text>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Basic Info */}
       <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
         {renderSectionHeader('General Info', 'information-circle')}
-        
+
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>Arena Name</Text>
+          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+            Arena Name
+          </Text>
           <TextInput
-            style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
+            style={[
+              styles.input,
+              { color: theme.colors.text, borderColor: theme.colors.border },
+            ]}
             value={name}
             onChangeText={setName}
             placeholder="Enter Arena Name"
@@ -115,9 +159,14 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>Contact Number</Text>
+          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+            Contact Number
+          </Text>
           <TextInput
-            style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
+            style={[
+              styles.input,
+              { color: theme.colors.text, borderColor: theme.colors.border },
+            ]}
             value={contactNumber}
             onChangeText={setContactNumber}
             placeholder="Enter Contact Number"
@@ -127,9 +176,14 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>Google Maps Link</Text>
+          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+            Google Maps Link
+          </Text>
           <TextInput
-            style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
+            style={[
+              styles.input,
+              { color: theme.colors.text, borderColor: theme.colors.border },
+            ]}
             value={googleMapsLink}
             onChangeText={setGoogleMapsLink}
             placeholder="Paste Google Maps Sharing Link"
@@ -141,24 +195,41 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
       {/* Photos */}
       <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
         {renderSectionHeader('Photos (Min 5)', 'images')}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoList}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.photoList}
+        >
           {photos.map((photo, index) => (
             <View key={index} style={styles.photoContainer}>
               <Image source={{ uri: photo }} style={styles.photo} />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.removePhoto}
-                onPress={() => setPhotos(prev => prev.filter((_, i) => i !== index))}
+                onPress={() =>
+                  setPhotos((prev) => prev.filter((_, i) => i !== index))
+                }
               >
-                <Ionicons name="close-circle" size={24} color={theme.colors.error} />
+                <Ionicons
+                  name="close-circle"
+                  size={24}
+                  color={theme.colors.error}
+                />
               </TouchableOpacity>
             </View>
           ))}
-          <TouchableOpacity 
-            style={[styles.addPhoto, { borderColor: theme.colors.border, borderStyle: 'dashed' }]}
-            onPress={() => Alert.alert('Photos', 'Photo selection would open here.')}
+          <TouchableOpacity
+            style={[
+              styles.addPhoto,
+              { borderColor: theme.colors.border, borderStyle: 'dashed' },
+            ]}
+            onPress={() =>
+              Alert.alert('Photos', 'Photo selection would open here.')
+            }
           >
             <Ionicons name="add" size={32} color={theme.colors.gray} />
-            <Text style={{ color: theme.colors.gray, fontSize: ms(12) }}>Add Photo</Text>
+            <Text style={{ color: theme.colors.gray, fontSize: ms(12) }}>
+              Add Photo
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -167,27 +238,41 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
       <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
         {renderSectionHeader('Amenities', 'list')}
         <View style={styles.amenitiesGrid}>
-          {amenities.map(amenity => (
-            <TouchableOpacity 
+          {amenities.map((amenity) => (
+            <TouchableOpacity
               key={amenity.id}
               style={[
-                styles.amenityChip, 
-                { 
-                  backgroundColor: amenity.available ? theme.colors.primary + '15' : 'transparent',
-                  borderColor: amenity.available ? theme.colors.primary : theme.colors.border
-                }
+                styles.amenityChip,
+                {
+                  backgroundColor: amenity.available
+                    ? theme.colors.primary + '15'
+                    : 'transparent',
+                  borderColor: amenity.available
+                    ? theme.colors.primary
+                    : theme.colors.border,
+                },
               ]}
               onPress={() => handleToggleAmenity(amenity.id)}
             >
-              <Ionicons 
-                name={amenity.icon as any} 
-                size={18} 
-                color={amenity.available ? theme.colors.primary : theme.colors.textSecondary} 
+              <Ionicons
+                name={amenity.icon as any}
+                size={18}
+                color={
+                  amenity.available
+                    ? theme.colors.primary
+                    : theme.colors.textSecondary
+                }
               />
-              <Text style={[
-                styles.amenityText, 
-                { color: amenity.available ? theme.colors.primary : theme.colors.textSecondary }
-              ]}>
+              <Text
+                style={[
+                  styles.amenityText,
+                  {
+                    color: amenity.available
+                      ? theme.colors.primary
+                      : theme.colors.textSecondary,
+                  },
+                ]}
+              >
                 {amenity.name}
               </Text>
             </TouchableOpacity>
@@ -200,30 +285,55 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
         {renderSectionHeader('Operating Hours', 'time')}
         {operatingHours.map((hours, index) => (
           <View key={index} style={styles.hoursRow}>
-            <Text style={[styles.dayText, { color: theme.colors.text }]}>{hours.day}</Text>
+            <Text style={[styles.dayText, { color: theme.colors.text }]}>
+              {hours.day}
+            </Text>
             <View style={styles.hoursInputs}>
               {!hours.isClosed ? (
                 <>
                   <TextInput
-                    style={[styles.timeInput, { color: theme.colors.text, borderColor: theme.colors.border }]}
+                    style={[
+                      styles.timeInput,
+                      {
+                        color: theme.colors.text,
+                        borderColor: theme.colors.border,
+                      },
+                    ]}
                     value={hours.open}
-                    onChangeText={(text) => handleUpdateHours(index, { open: text })}
+                    onChangeText={(text) =>
+                      handleUpdateHours(index, { open: text })
+                    }
                   />
                   <Text style={{ color: theme.colors.textSecondary }}>-</Text>
                   <TextInput
-                    style={[styles.timeInput, { color: theme.colors.text, borderColor: theme.colors.border }]}
+                    style={[
+                      styles.timeInput,
+                      {
+                        color: theme.colors.text,
+                        borderColor: theme.colors.border,
+                      },
+                    ]}
                     value={hours.close}
-                    onChangeText={(text) => handleUpdateHours(index, { close: text })}
+                    onChangeText={(text) =>
+                      handleUpdateHours(index, { close: text })
+                    }
                   />
                 </>
               ) : (
-                <Text style={{ color: theme.colors.error, fontWeight: '600' }}>Closed</Text>
+                <Text style={{ color: theme.colors.error, fontWeight: '600' }}>
+                  Closed
+                </Text>
               )}
             </View>
             <Switch
               value={!hours.isClosed}
-              onValueChange={(val) => handleUpdateHours(index, { isClosed: !val })}
-              trackColor={{ false: theme.colors.gray, true: theme.colors.success }}
+              onValueChange={(val) =>
+                handleUpdateHours(index, { isClosed: !val })
+              }
+              trackColor={{
+                false: theme.colors.gray,
+                true: theme.colors.success,
+              }}
             />
           </View>
         ))}
@@ -234,9 +344,14 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
         {renderSectionHeader('Pricing per Sport (₹/hour)', 'cash')}
         {pricingBySport.map((p, index) => (
           <View key={index} style={styles.pricingRow}>
-            <Text style={[styles.sportName, { color: theme.colors.text }]}>{p.sport}</Text>
+            <Text style={[styles.sportName, { color: theme.colors.text }]}>
+              {p.sport}
+            </Text>
             <TextInput
-              style={[styles.priceInput, { color: theme.colors.text, borderColor: theme.colors.border }]}
+              style={[
+                styles.priceInput,
+                { color: theme.colors.text, borderColor: theme.colors.border },
+              ]}
               value={p.pricePerHour.toString()}
               onChangeText={(text) => handleUpdatePricing(p.sport, text)}
               keyboardType="numeric"
@@ -249,7 +364,10 @@ const ArenaSettingsTab: React.FC<ArenaSettingsTabProps> = ({
       <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
         {renderSectionHeader('Default Cancellation Policy', 'document-text')}
         <TextInput
-          style={[styles.textArea, { color: theme.colors.text, borderColor: theme.colors.border }]}
+          style={[
+            styles.textArea,
+            { color: theme.colors.text, borderColor: theme.colors.border },
+          ]}
           value={cancellationPolicy}
           onChangeText={setCancellationPolicy}
           placeholder="Enter Cancellation Policy"

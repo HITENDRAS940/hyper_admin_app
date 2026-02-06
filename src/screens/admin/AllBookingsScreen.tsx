@@ -10,12 +10,12 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  interpolate, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
   Extrapolate,
-  useAnimatedScrollHandler
+  useAnimatedScrollHandler,
 } from 'react-native-reanimated';
 import { s, vs, ms } from 'react-native-size-matters';
 import { ScreenWrapper } from '../../components/shared/ScreenWrapper';
@@ -40,19 +40,46 @@ const AllBookingsScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Generate 15 days for selection (7 past, today, 7 future)
-  const dates = useMemo(() => Array.from({ length: 15 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - 7 + i);
-    return d;
-  }), []);
+  const dates = useMemo(
+    () =>
+      Array.from({ length: 15 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - 7 + i);
+        return d;
+      }),
+    [],
+  );
 
-  const filters = useMemo(() => [
-    { key: 'ALL', label: 'All', count: bookings.length },
-    { key: 'CONFIRMED', label: 'Confirmed', count: bookings.filter(b => b.status.toUpperCase() === 'CONFIRMED').length },
-    { key: 'PENDING', label: 'Pending', count: bookings.filter(b => b.status.toUpperCase() === 'PENDING').length },
-    { key: 'CANCELLED', label: 'Cancelled', count: bookings.filter(b => b.status.toUpperCase() === 'CANCELLED').length },
-    { key: 'COMPLETED', label: 'Completed', count: bookings.filter(b => b.status.toUpperCase() === 'COMPLETED').length },
-  ], [bookings]);
+  const filters = useMemo(
+    () => [
+      { key: 'ALL', label: 'All', count: bookings.length },
+      {
+        key: 'CONFIRMED',
+        label: 'Confirmed',
+        count: bookings.filter((b) => b.status.toUpperCase() === 'CONFIRMED')
+          .length,
+      },
+      {
+        key: 'PENDING',
+        label: 'Pending',
+        count: bookings.filter((b) => b.status.toUpperCase() === 'PENDING')
+          .length,
+      },
+      {
+        key: 'CANCELLED',
+        label: 'Cancelled',
+        count: bookings.filter((b) => b.status.toUpperCase() === 'CANCELLED')
+          .length,
+      },
+      {
+        key: 'COMPLETED',
+        label: 'Completed',
+        count: bookings.filter((b) => b.status.toUpperCase() === 'COMPLETED')
+          .length,
+      },
+    ],
+    [bookings],
+  );
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -80,10 +107,15 @@ const AllBookingsScreen = () => {
     fetchBookings();
   }, [fetchBookings]);
 
-  const filteredBookings = useMemo(() => selectedFilter === 'ALL' 
-    ? bookings 
-    : bookings.filter(booking => booking.status.toUpperCase() === selectedFilter.toUpperCase()),
-    [bookings, selectedFilter]
+  const filteredBookings = useMemo(
+    () =>
+      selectedFilter === 'ALL'
+        ? bookings
+        : bookings.filter(
+            (booking) =>
+              booking.status.toUpperCase() === selectedFilter.toUpperCase(),
+          ),
+    [bookings, selectedFilter],
   );
 
   const SCALED_SUBHEADER_MARGIN = vs(10);
@@ -99,11 +131,11 @@ const AllBookingsScreen = () => {
     onScroll: (event) => {
       const currentScrollY = event.contentOffset.y;
       const diff = currentScrollY - lastScrollY.value;
-      
+
       // Update translateY based on scroll direction (Smart Header)
       translateY.value = Math.min(
         0,
-        Math.max(-MAX_SUBHEADER_HEIGHT, translateY.value - diff)
+        Math.max(-MAX_SUBHEADER_HEIGHT, translateY.value - diff),
       );
 
       // Reset to 0 if at very top (bounces/overscroll)
@@ -127,7 +159,7 @@ const AllBookingsScreen = () => {
       translateY.value,
       [-MAX_SUBHEADER_HEIGHT, -MAX_SUBHEADER_HEIGHT + vs20],
       [0.08, 0],
-      Extrapolate.CLAMP
+      Extrapolate.CLAMP,
     );
     return {
       shadowOpacity,
@@ -142,7 +174,7 @@ const AllBookingsScreen = () => {
       translateY.value,
       [-MAX_SUBHEADER_HEIGHT + vs20, -MAX_SUBHEADER_HEIGHT + vs40],
       [0, 0.08],
-      Extrapolate.CLAMP
+      Extrapolate.CLAMP,
     );
 
     return {
@@ -151,7 +183,7 @@ const AllBookingsScreen = () => {
         translateY.value,
         [-MAX_SUBHEADER_HEIGHT, -MAX_SUBHEADER_HEIGHT + vs30],
         [0, 1],
-        Extrapolate.CLAMP
+        Extrapolate.CLAMP,
       ),
       position: 'absolute',
       top: HEADER_BASE_HEIGHT,
@@ -167,28 +199,34 @@ const AllBookingsScreen = () => {
     };
   });
 
+  const handleCheckIn = useCallback(
+    async (booking: AdminBooking) => {
+      try {
+        await adminAPI.completeBooking(booking.id);
+        Alert.alert('Success', 'Customer checked in successfully');
+        fetchBookings();
+      } catch (error) {
+        Alert.alert('Error', 'Failed to complete booking');
+      }
+    },
+    [fetchBookings],
+  );
 
-  const handleCheckIn = useCallback(async (booking: AdminBooking) => {
-    try {
-      await adminAPI.completeBooking(booking.id);
-      Alert.alert('Success', 'Customer checked in successfully');
-      fetchBookings();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to complete booking');
-    }
-  }, [fetchBookings]);
+  const handleNoShow = useCallback(
+    async (booking: AdminBooking) => {
+      try {
+        await adminAPI.updateAttendanceStatus(booking.id, 'NO_SHOW');
+        Alert.alert('Success', 'Marked as No Show');
+        fetchBookings();
+      } catch (error) {
+        Alert.alert('Error', 'Failed to update attendance');
+      }
+    },
+    [fetchBookings],
+  );
 
-  const handleNoShow = useCallback(async (booking: AdminBooking) => {
-    try {
-      await adminAPI.updateAttendanceStatus(booking.id, 'NO_SHOW');
-      Alert.alert('Success', 'Marked as No Show');
-      fetchBookings();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update attendance');
-    }
-  }, [fetchBookings]);
-
-  const [cancellingBooking, setCancellingBooking] = useState<AdminBooking | null>(null);
+  const [cancellingBooking, setCancellingBooking] =
+    useState<AdminBooking | null>(null);
   const [cancellationReason, setCancellationReason] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
 
@@ -198,7 +236,7 @@ const AllBookingsScreen = () => {
     'Weather Conditions',
     'Double Booking',
     'Technical Error',
-    'Other'
+    'Other',
   ];
 
   const handleCancelBooking = useCallback((booking: AdminBooking) => {
@@ -209,13 +247,20 @@ const AllBookingsScreen = () => {
   const confirmCancellation = async () => {
     if (!cancellingBooking) return;
     if (!cancellationReason) {
-      Alert.alert('Reason Required', 'Please select or enter a reason for cancellation');
+      Alert.alert(
+        'Reason Required',
+        'Please select or enter a reason for cancellation',
+      );
       return;
     }
 
     try {
       setIsCancelling(true);
-      await adminAPI.updateBookingStatus(cancellingBooking.id, 'CANCELLED', cancellationReason);
+      await adminAPI.updateBookingStatus(
+        cancellingBooking.id,
+        'CANCELLED',
+        cancellationReason,
+      );
       Alert.alert('Success', 'Booking cancelled');
       setCancellingBooking(null);
       fetchBookings();
@@ -227,100 +272,151 @@ const AllBookingsScreen = () => {
   };
 
   const handleReschedule = useCallback((booking: AdminBooking) => {
-    Alert.alert('Reschedule', 'Rescheduling flow will be integrated with the calendar soon.');
+    Alert.alert(
+      'Reschedule',
+      'Rescheduling flow will be integrated with the calendar soon.',
+    );
   }, []);
 
-  const renderFilterButton = useCallback((filter: any) => {
-    const isSelected = selectedFilter === filter.key;
-    return (
-      <TouchableOpacity
-        key={filter.key}
-        style={[
-          styles.filterButton,
-          { 
-            backgroundColor: isSelected ? theme.colors.primary : theme.colors.card,
-            borderColor: isSelected ? theme.colors.primary : theme.colors.border,
-          }
-        ]}
-        onPress={() => setSelectedFilter(filter.key)}
-      >
-        <Text style={[
-          styles.filterText,
-          { color: isSelected ? '#FFFFFF' : theme.colors.textSecondary }
-        ]}>
-          {filter.label} ({filter.count})
-        </Text>
-      </TouchableOpacity>
-    );
-  }, [selectedFilter, theme.colors]);
+  const renderFilterButton = useCallback(
+    (filter: any) => {
+      const isSelected = selectedFilter === filter.key;
+      return (
+        <TouchableOpacity
+          key={filter.key}
+          style={[
+            styles.filterButton,
+            {
+              backgroundColor: isSelected
+                ? theme.colors.primary
+                : theme.colors.card,
+              borderColor: isSelected
+                ? theme.colors.primary
+                : theme.colors.border,
+            },
+          ]}
+          onPress={() => setSelectedFilter(filter.key)}
+        >
+          <Text
+            style={[
+              styles.filterText,
+              { color: isSelected ? '#FFFFFF' : theme.colors.textSecondary },
+            ]}
+          >
+            {filter.label} ({filter.count})
+          </Text>
+        </TouchableOpacity>
+      );
+    },
+    [selectedFilter, theme.colors],
+  );
 
-  const renderDateItem = useCallback((date: Date) => {
-    const isSelected = format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
-    const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-    
-    return (
-      <TouchableOpacity
-        key={date.toISOString()}
-        onPress={() => setSelectedDate(date)}
-        style={[
-          styles.dateItem,
-          isSelected && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
-        ]}
-      >
-        <Text style={[styles.dayText, { color: isSelected ? '#FFF' : theme.colors.textSecondary }]}>
-          {format(date, 'EEE')}
-        </Text>
-        <Text style={[styles.dateNumber, { color: isSelected ? '#FFF' : theme.colors.text }]}>
-          {format(date, 'd')}
-        </Text>
-        {isToday && !isSelected && <View style={[styles.todayIndicator, { backgroundColor: theme.colors.primary }]} />}
-      </TouchableOpacity>
-    );
-  }, [selectedDate, theme.colors]);
+  const renderDateItem = useCallback(
+    (date: Date) => {
+      const isSelected =
+        format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+      const isToday =
+        format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
-  const renderBookingItem = useCallback(({ item }: { item: AdminBooking }) => (
-    <BookingCard 
-      booking={item}
-      onCheckIn={handleCheckIn}
-      onNoShow={handleNoShow}
-      onCancel={handleCancelBooking}
-      onReschedule={handleReschedule}
-    />
-  ), [handleCheckIn, handleNoShow, handleCancelBooking, handleReschedule]);
+      return (
+        <TouchableOpacity
+          key={date.toISOString()}
+          onPress={() => setSelectedDate(date)}
+          style={[
+            styles.dateItem,
+            isSelected && {
+              backgroundColor: theme.colors.primary,
+              borderColor: theme.colors.primary,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.dayText,
+              { color: isSelected ? '#FFF' : theme.colors.textSecondary },
+            ]}
+          >
+            {format(date, 'EEE')}
+          </Text>
+          <Text
+            style={[
+              styles.dateNumber,
+              { color: isSelected ? '#FFF' : theme.colors.text },
+            ]}
+          >
+            {format(date, 'd')}
+          </Text>
+          {isToday && !isSelected && (
+            <View
+              style={[
+                styles.todayIndicator,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+          )}
+        </TouchableOpacity>
+      );
+    },
+    [selectedDate, theme.colors],
+  );
 
-
+  const renderBookingItem = useCallback(
+    ({ item }: { item: AdminBooking }) => (
+      <BookingCard
+        booking={item}
+        onCheckIn={handleCheckIn}
+        onNoShow={handleNoShow}
+        onCancel={handleCancelBooking}
+        onReschedule={handleReschedule}
+      />
+    ),
+    [handleCheckIn, handleNoShow, handleCancelBooking, handleReschedule],
+  );
 
   return (
-    <ScreenWrapper 
+    <ScreenWrapper
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       safeAreaEdges={['left', 'right']}
     >
       {/* Clean Sticky Header */}
-      <Animated.View style={[
-        styles.cleanHeader, 
-        headerStyle, 
-        { 
-          height: HEADER_BASE_HEIGHT,
-          paddingTop: insets.top,
-          backgroundColor: theme.colors.background,
-        }
-      ]}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Live Bookings</Text>
+      <Animated.View
+        style={[
+          styles.cleanHeader,
+          headerStyle,
+          {
+            height: HEADER_BASE_HEIGHT,
+            paddingTop: insets.top,
+            backgroundColor: theme.colors.background,
+          },
+        ]}
+      >
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+          Live Bookings
+        </Text>
         <View style={styles.headerIcons}>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => navigation.navigate('BookingHistory')}
             activeOpacity={0.7}
             style={styles.iconCircle}
           >
             <Animated.View>
-              <Ionicons name="time-outline" size={22} color={theme.colors.text} />
+              <Ionicons
+                name="time-outline"
+                size={22}
+                color={theme.colors.text}
+              />
             </Animated.View>
           </TouchableOpacity>
         </View>
       </Animated.View>
 
       {/* Animated Collapsible Sub-Header (Absolute) */}
-      <Animated.View style={[subHeaderStyle, { backgroundColor: theme.colors.background, overflow: 'hidden' }]}>
+      <Animated.View
+        style={[
+          subHeaderStyle,
+          { backgroundColor: theme.colors.background, overflow: 'hidden' },
+        ]}
+      >
         {/* Date Selector */}
         <View style={styles.dateSelectorWrapper}>
           <FlatList
@@ -344,7 +440,7 @@ const AllBookingsScreen = () => {
             horizontal
             data={filters}
             renderItem={({ item }) => renderFilterButton(item)}
-            keyExtractor={item => item.key}
+            keyExtractor={(item) => item.key}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filtersContainer}
           />
@@ -353,11 +449,16 @@ const AllBookingsScreen = () => {
 
       <View style={{ flex: 1 }}>
         {loading && !refreshing ? (
-          <View style={[styles.listLoadingContainer, { marginTop: MAX_SUBHEADER_HEIGHT }]}>
+          <View
+            style={[
+              styles.listLoadingContainer,
+              { marginTop: MAX_SUBHEADER_HEIGHT },
+            ]}
+          >
             <ActivityIndicator size="large" color={theme.colors.primary} />
           </View>
         ) : filteredBookings.length === 0 ? (
-          <EmptyState 
+          <EmptyState
             icon="calendar-outline"
             title="No Bookings Found"
             description={`No ${selectedFilter.toLowerCase()} bookings available.`}
@@ -367,7 +468,10 @@ const AllBookingsScreen = () => {
             data={filteredBookings}
             renderItem={renderBookingItem}
             keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={[styles.list, { paddingTop: MAX_SUBHEADER_HEIGHT + vs(10) }]}
+            contentContainerStyle={[
+              styles.list,
+              { paddingTop: MAX_SUBHEADER_HEIGHT + vs(10) },
+            ]}
             onScroll={scrollHandler}
             scrollEventThrottle={16}
             refreshControl={
@@ -389,15 +493,31 @@ const AllBookingsScreen = () => {
         onRequestClose={() => setCancellingBooking(null)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: theme.colors.surface },
+            ]}
+          >
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Cancel Booking</Text>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+                Cancel Booking
+              </Text>
               <TouchableOpacity onPress={() => setCancellingBooking(null)}>
-                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
               </TouchableOpacity>
             </View>
-            
-            <Text style={[styles.modalSubtitle, { color: theme.colors.textSecondary }]}>
+
+            <Text
+              style={[
+                styles.modalSubtitle,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Select a reason for cancelling #{cancellingBooking?.reference}
             </Text>
 
@@ -407,22 +527,39 @@ const AllBookingsScreen = () => {
                   key={reason}
                   style={[
                     styles.reasonItem,
-                    { 
-                      backgroundColor: cancellationReason === reason ? theme.colors.primary + '10' : 'transparent',
+                    {
+                      backgroundColor:
+                        cancellationReason === reason
+                          ? theme.colors.primary + '10'
+                          : 'transparent',
                       borderWidth: cancellationReason === reason ? 2 : 1,
-                      borderColor: cancellationReason === reason ? theme.colors.primary : theme.colors.border + '50'
-                    }
+                      borderColor:
+                        cancellationReason === reason
+                          ? theme.colors.primary
+                          : theme.colors.border + '50',
+                    },
                   ]}
                   onPress={() => setCancellationReason(reason)}
                 >
-                  <Text style={[
-                    styles.reasonText, 
-                    { color: cancellationReason === reason ? theme.colors.primary : theme.colors.text }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.reasonText,
+                      {
+                        color:
+                          cancellationReason === reason
+                            ? theme.colors.primary
+                            : theme.colors.text,
+                      },
+                    ]}
+                  >
                     {reason}
                   </Text>
                   {cancellationReason === reason && (
-                    <Ionicons name="checkmark-circle" size={20} color={theme.colors.primary} />
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color={theme.colors.primary}
+                    />
                   )}
                 </TouchableOpacity>
               ))}
@@ -431,7 +568,10 @@ const AllBookingsScreen = () => {
             <TouchableOpacity
               style={[
                 styles.confirmButton,
-                { backgroundColor: theme.colors.error, opacity: isCancelling ? 0.7 : 1 }
+                {
+                  backgroundColor: theme.colors.error,
+                  opacity: isCancelling ? 0.7 : 1,
+                },
               ]}
               onPress={confirmCancellation}
               disabled={isCancelling}
@@ -439,7 +579,9 @@ const AllBookingsScreen = () => {
               {isCancelling ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text style={styles.confirmButtonText}>Confirm Cancellation</Text>
+                <Text style={styles.confirmButtonText}>
+                  Confirm Cancellation
+                </Text>
               )}
             </TouchableOpacity>
           </View>

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Modal, View, Text, StyleSheet, TouchableOpacity, 
-  FlatList, TextInput, ActivityIndicator, Alert 
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -42,14 +49,17 @@ const DisableSlotByDateModal: React.FC<DisableSlotByDateModalProps> = ({
   }, [visible]);
 
   const toggleSlot = (id: number) => {
-    setSelectedSlotIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    setSelectedSlotIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
   const handleConfirm = async () => {
     if (selectedSlotIds.length === 0) {
-      Alert.alert('Selection Required', 'Please select at least one slot to block.');
+      Alert.alert(
+        'Selection Required',
+        'Please select at least one slot to block.',
+      );
       return;
     }
 
@@ -64,7 +74,10 @@ const DisableSlotByDateModal: React.FC<DisableSlotByDateModalProps> = ({
       onClose();
     } catch (error: any) {
       // Error is handled by parent, but we should stop and notify.
-      Alert.alert('Error', 'Some slots could not be disabled. Check console for details.');
+      Alert.alert(
+        'Error',
+        'Some slots could not be disabled. Check console for details.',
+      );
     } finally {
       setSaving(false);
     }
@@ -73,7 +86,10 @@ const DisableSlotByDateModal: React.FC<DisableSlotByDateModalProps> = ({
   const formatTime = (time: string) => {
     if (!time) return '';
     if (time.includes('T')) {
-      return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return new Date(time).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
     return time;
   };
@@ -81,45 +97,79 @@ const DisableSlotByDateModal: React.FC<DisableSlotByDateModalProps> = ({
   const renderSlotItem = ({ item }: { item: ServiceSlot }) => {
     const isSelected = selectedSlotIds.includes(item.slotId || item.id);
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
-          styles.slotItem, 
-          { 
-            backgroundColor: isSelected ? theme.colors.primary + '15' : theme.colors.background,
-            borderColor: isSelected ? theme.colors.primary : theme.colors.border
-          }
+          styles.slotItem,
+          {
+            backgroundColor: isSelected
+              ? theme.colors.primary + '15'
+              : theme.colors.background,
+            borderColor: isSelected
+              ? theme.colors.primary
+              : theme.colors.border,
+          },
         ]}
         onPress={() => toggleSlot(item.slotId || item.id)}
       >
-        <Text style={[styles.slotTime, { color: isSelected ? theme.colors.primary : theme.colors.text }]}>
+        <Text
+          style={[
+            styles.slotTime,
+            { color: isSelected ? theme.colors.primary : theme.colors.text },
+          ]}
+        >
           {formatTime(item.startTime)}
         </Text>
-        {isSelected && <Ionicons name="checkmark-circle" size={18} color={theme.colors.primary} />}
+        {isSelected && (
+          <Ionicons
+            name="checkmark-circle"
+            size={18}
+            color={theme.colors.primary}
+          />
+        )}
       </TouchableOpacity>
     );
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <View style={styles.overlay}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+        <View
+          style={[styles.modalContent, { backgroundColor: theme.colors.card }]}
+        >
           <View style={styles.header}>
             <View>
-              <Text style={[styles.title, { color: theme.colors.text }]}>Block Slots for Date</Text>
-              <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+              <Text style={[styles.title, { color: theme.colors.text }]}>
+                Block Slots for Date
+              </Text>
+              <Text
+                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
+              >
                 {format(selectedDate, 'EEEE, dd MMMM yyyy')}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              <Ionicons
+                name="close"
+                size={24}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
           <View style={styles.body}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Select Slots to Block</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              Select Slots to Block
+            </Text>
             <FlatList
               data={slots}
-              keyExtractor={(item, index) => (item.id || item.slotId || index).toString()}
+              keyExtractor={(item, index) =>
+                (item.id || item.slotId || index).toString()
+              }
               renderItem={renderSlotItem}
               numColumns={3}
               contentContainerStyle={styles.listContent}
@@ -127,9 +177,17 @@ const DisableSlotByDateModal: React.FC<DisableSlotByDateModalProps> = ({
             />
 
             <View style={styles.reasonContainer}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Reason for Blocking</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                Reason for Blocking
+              </Text>
               <TextInput
-                style={[styles.reasonInput, { color: theme.colors.text, borderColor: theme.colors.border }]}
+                style={[
+                  styles.reasonInput,
+                  {
+                    color: theme.colors.text,
+                    borderColor: theme.colors.border,
+                  },
+                ]}
                 value={reason}
                 onChangeText={setReason}
                 placeholder="Enter reason (e.g. Maintenance)"
@@ -139,19 +197,32 @@ const DisableSlotByDateModal: React.FC<DisableSlotByDateModalProps> = ({
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity 
-              style={[styles.cancelButton, { borderColor: theme.colors.border }]} 
+            <TouchableOpacity
+              style={[
+                styles.cancelButton,
+                { borderColor: theme.colors.border },
+              ]}
               onPress={onClose}
               disabled={saving}
             >
-              <Text style={[styles.cancelText, { color: theme.colors.textSecondary }]}>Cancel</Text>
+              <Text
+                style={[
+                  styles.cancelText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Cancel
+              </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[
-                styles.confirmButton, 
-                { backgroundColor: selectedSlotIds.length > 0 ? '#EF4444' : '#CBD5E1' }
-              ]} 
+                styles.confirmButton,
+                {
+                  backgroundColor:
+                    selectedSlotIds.length > 0 ? '#EF4444' : '#CBD5E1',
+                },
+              ]}
               onPress={handleConfirm}
               disabled={saving || selectedSlotIds.length === 0}
             >

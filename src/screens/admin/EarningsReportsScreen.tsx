@@ -1,5 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Share } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  Share,
+} from 'react-native';
 import { ScreenWrapper } from '../../components/shared/ScreenWrapper';
 import { useTheme } from '../../contexts/ThemeContext';
 import GradientHeader from '../../components/shared/GradientHeader';
@@ -12,7 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const EarningsReportsScreen = () => {
   const { theme } = useTheme();
-  
+
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
   const [data, setData] = React.useState<any>(null);
@@ -41,20 +50,20 @@ const EarningsReportsScreen = () => {
 
   const handleExportCSV = async () => {
     if (!data) return;
-    
+
     try {
       let csvContent = 'Metric,Value\n';
       csvContent += `Total Revenue,₹${data.revenue?.total || 0}\n`;
       csvContent += `Total Bookings,${data.bookings?.total || 0}\n`;
       csvContent += `Cancellation Rate,${data.cancellationRate || 0}%\n\n`;
-      
+
       csvContent += 'Bookings by Sport,Count,Revenue\n';
       data.bookingsBySport?.forEach((s: any) => {
         csvContent += `${s.sport},${s.count},₹${s.revenue}\n`;
       });
-      
+
       const fileName = `Report_${format(new Date(), 'yyyyMMdd')}.csv`;
-      
+
       await Share.share({
         message: csvContent,
         title: fileName,
@@ -66,7 +75,10 @@ const EarningsReportsScreen = () => {
 
   if (loading && !refreshing) {
     return (
-      <ScreenWrapper style={[styles.container, { backgroundColor: theme.colors.background }]} safeAreaEdges={['left', 'right']}>
+      <ScreenWrapper
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        safeAreaEdges={['left', 'right']}
+      >
         <GradientHeader title="Reports" subtitle="Loading analytics..." />
         <View style={styles.center}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -81,20 +93,21 @@ const EarningsReportsScreen = () => {
   const peakHours = data?.peakHours || [];
 
   return (
-    <ScreenWrapper 
+    <ScreenWrapper
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       safeAreaEdges={['left', 'right']}
     >
-      <GradientHeader
-        title="Earnings"
-        subtitle="Revenue & Venue Performance"
-      />
-      
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
+      <GradientHeader title="Earnings" subtitle="Revenue & Venue Performance" />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+          />
         }
       >
         {/* Export Button */}
@@ -111,13 +124,30 @@ const EarningsReportsScreen = () => {
         </TouchableOpacity>
 
         {/* Main Revenue Card */}
-        <View style={[styles.mainRevenueContainer, { backgroundColor: theme.colors.primary }]}>
+        <View
+          style={[
+            styles.mainRevenueContainer,
+            { backgroundColor: theme.colors.primary },
+          ]}
+        >
           <Text style={styles.revenueLabel}>Total Earnings (Monthly)</Text>
-          <Text style={styles.revenueValue}>₹{revenue.total?.toLocaleString()}</Text>
+          <Text style={styles.revenueValue}>
+            ₹{revenue.total?.toLocaleString()}
+          </Text>
           <View style={styles.revenueTrend}>
-            <Ionicons name={revenue.trend >= 0 ? "arrow-up" : "arrow-down"} size={16} color={revenue.trend >= 0 ? "#4ADE80" : "#F87171"} />
-            <Text style={[styles.trendText, { color: revenue.trend >= 0 ? "#4ADE80" : "#F87171" }]}>
-              {revenue.trend >= 0 ? '+' : ''}{revenue.trend}% from last month
+            <Ionicons
+              name={revenue.trend >= 0 ? 'arrow-up' : 'arrow-down'}
+              size={16}
+              color={revenue.trend >= 0 ? '#4ADE80' : '#F87171'}
+            />
+            <Text
+              style={[
+                styles.trendText,
+                { color: revenue.trend >= 0 ? '#4ADE80' : '#F87171' },
+              ]}
+            >
+              {revenue.trend >= 0 ? '+' : ''}
+              {revenue.trend}% from last month
             </Text>
           </View>
         </View>
@@ -125,60 +155,111 @@ const EarningsReportsScreen = () => {
         {/* Breakdown Stats */}
         <View style={styles.statsGrid}>
           <View style={styles.statsRow}>
-            <StatCard title="This Week" value={`₹${(data?.weeklyRevenue || 0).toLocaleString()}`} icon="cash-outline" color="#10B981" />
-            <StatCard title="Today" value={`₹${(data?.dailyRevenue || 0).toLocaleString()}`} icon="today-outline" color="#3B82F6" />
+            <StatCard
+              title="This Week"
+              value={`₹${(data?.weeklyRevenue || 0).toLocaleString()}`}
+              icon="cash-outline"
+              color="#10B981"
+            />
+            <StatCard
+              title="Today"
+              value={`₹${(data?.dailyRevenue || 0).toLocaleString()}`}
+              icon="today-outline"
+              color="#3B82F6"
+            />
           </View>
           <View style={[styles.statsRow, { marginTop: vs(12) }]}>
-            <StatCard title="Total Bookings" value={`${data?.bookings?.total || 0}`} icon="calendar-outline" color="#6366F1" />
-            <StatCard title="Cancellation Rate" value={`${data?.cancellationRate || 0}%`} icon="close-circle-outline" color="#F87171" />
+            <StatCard
+              title="Total Bookings"
+              value={`${data?.bookings?.total || 0}`}
+              icon="calendar-outline"
+              color="#6366F1"
+            />
+            <StatCard
+              title="Cancellation Rate"
+              value={`${data?.cancellationRate || 0}%`}
+              icon="close-circle-outline"
+              color="#F87171"
+            />
           </View>
         </View>
 
         {/* Bookings by Sport */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Bookings by Sport</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Bookings by Sport
+          </Text>
         </View>
-        <View style={[styles.chartCard, { backgroundColor: theme.colors.card }]}>
+        <View
+          style={[styles.chartCard, { backgroundColor: theme.colors.card }]}
+        >
           {bookingsBySport.map((item: any, index: number) => (
-             <View key={index} style={styles.sportItem}>
-                <View style={styles.sportInfo}>
-                  <Text style={[styles.sportName, { color: theme.colors.text }]}>{item.sport}</Text>
-                  <Text style={[styles.sportRevenue, { color: theme.colors.textSecondary }]}>₹{item.revenue.toLocaleString()}</Text>
-                </View>
-                <View style={styles.sportBarContainer}>
-                   <View 
-                    style={[
-                      styles.sportBar, 
-                      { 
-                        width: `${(item.count / (data?.bookings?.total || 1)) * 100}%`,
-                        backgroundColor: theme.colors.primary
-                      }
-                    ]} 
-                   />
-                </View>
-                <Text style={[styles.sportCount, { color: theme.colors.primary }]}>{item.count}</Text>
-             </View>
+            <View key={index} style={styles.sportItem}>
+              <View style={styles.sportInfo}>
+                <Text style={[styles.sportName, { color: theme.colors.text }]}>
+                  {item.sport}
+                </Text>
+                <Text
+                  style={[
+                    styles.sportRevenue,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  ₹{item.revenue.toLocaleString()}
+                </Text>
+              </View>
+              <View style={styles.sportBarContainer}>
+                <View
+                  style={[
+                    styles.sportBar,
+                    {
+                      width: `${(item.count / (data?.bookings?.total || 1)) * 100}%`,
+                      backgroundColor: theme.colors.primary,
+                    },
+                  ]}
+                />
+              </View>
+              <Text
+                style={[styles.sportCount, { color: theme.colors.primary }]}
+              >
+                {item.count}
+              </Text>
+            </View>
           ))}
         </View>
 
         {/* Peak Hours Chart */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Peak Hours (Today)</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Peak Hours (Today)
+          </Text>
         </View>
-        <View style={[styles.peakChartCard, { backgroundColor: theme.colors.card }]}>
-           <View style={styles.peakChartContainer}>
+        <View
+          style={[styles.peakChartCard, { backgroundColor: theme.colors.card }]}
+        >
+          <View style={styles.peakChartContainer}>
             {peakHours.map((item: any, index: number) => (
               <View key={index} style={styles.peakBarWrapper}>
-                <View 
+                <View
                   style={[
-                    styles.peakBar, 
-                    { 
-                      height: `${item.occupancy}%`, 
-                      backgroundColor: item.occupancy > 80 ? theme.colors.error : theme.colors.primary 
-                    }
-                  ]} 
+                    styles.peakBar,
+                    {
+                      height: `${item.occupancy}%`,
+                      backgroundColor:
+                        item.occupancy > 80
+                          ? theme.colors.error
+                          : theme.colors.primary,
+                    },
+                  ]}
                 />
-                <Text style={[styles.peakLabel, { color: theme.colors.textSecondary }]}>{item.hour}</Text>
+                <Text
+                  style={[
+                    styles.peakLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {item.hour}
+                </Text>
               </View>
             ))}
           </View>
@@ -186,43 +267,120 @@ const EarningsReportsScreen = () => {
 
         {/* Booking Distribution */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Booking Method</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Booking Method
+          </Text>
         </View>
-        <View style={[styles.chartCard, { backgroundColor: theme.colors.card }]}>
-           <View style={styles.distributionContainer}>
-              <View style={styles.distributionItem}>
-                 <Text style={[styles.distLabel, { color: theme.colors.textSecondary }]}>Online Payments</Text>
-                 <Text style={[styles.distValue, { color: theme.colors.text }]}>{data?.bookings?.online || 0}</Text>
-                 <View style={styles.distBarBg}>
-                    <View style={[styles.distBar, { width: `${(data?.bookings?.online / (data?.bookings?.total || 1)) * 100}%`, backgroundColor: '#6366F1' }]} />
-                 </View>
+        <View
+          style={[styles.chartCard, { backgroundColor: theme.colors.card }]}
+        >
+          <View style={styles.distributionContainer}>
+            <View style={styles.distributionItem}>
+              <Text
+                style={[
+                  styles.distLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Online Payments
+              </Text>
+              <Text style={[styles.distValue, { color: theme.colors.text }]}>
+                {data?.bookings?.online || 0}
+              </Text>
+              <View style={styles.distBarBg}>
+                <View
+                  style={[
+                    styles.distBar,
+                    {
+                      width: `${(data?.bookings?.online / (data?.bookings?.total || 1)) * 100}%`,
+                      backgroundColor: '#6366F1',
+                    },
+                  ]}
+                />
               </View>
-              <View style={styles.distributionItem}>
-                 <Text style={[styles.distLabel, { color: theme.colors.textSecondary }]}>Offline / Cash</Text>
-                 <Text style={[styles.distValue, { color: theme.colors.text }]}>{data?.bookings?.offline || 0}</Text>
-                 <View style={styles.distBarBg}>
-                    <View style={[styles.distBar, { width: `${(data?.bookings?.offline / (data?.bookings?.total || 1)) * 100}%`, backgroundColor: '#10B981' }]} />
-                 </View>
+            </View>
+            <View style={styles.distributionItem}>
+              <Text
+                style={[
+                  styles.distLabel,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Offline / Cash
+              </Text>
+              <Text style={[styles.distValue, { color: theme.colors.text }]}>
+                {data?.bookings?.offline || 0}
+              </Text>
+              <View style={styles.distBarBg}>
+                <View
+                  style={[
+                    styles.distBar,
+                    {
+                      width: `${(data?.bookings?.offline / (data?.bookings?.total || 1)) * 100}%`,
+                      backgroundColor: '#10B981',
+                    },
+                  ]}
+                />
               </View>
-           </View>
+            </View>
+          </View>
         </View>
 
         {/* Top Performing Services */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Top Performing Venues</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Top Performing Venues
+          </Text>
         </View>
 
         <View style={styles.topServicesContainer}>
-          {topServices.length > 0 ? topServices.map((service: any, index: number) => (
-            <View key={index} style={[styles.serviceCard, { backgroundColor: theme.colors.card }]}>
-              <View style={styles.serviceInfo}>
-                <Text style={[styles.serviceNameText, { color: theme.colors.text }]}>{service.name}</Text>
-                <Text style={[styles.serviceBookings, { color: theme.colors.textSecondary }]}>{service.bookings} bookings</Text>
+          {topServices.length > 0 ? (
+            topServices.map((service: any, index: number) => (
+              <View
+                key={index}
+                style={[
+                  styles.serviceCard,
+                  { backgroundColor: theme.colors.card },
+                ]}
+              >
+                <View style={styles.serviceInfo}>
+                  <Text
+                    style={[
+                      styles.serviceNameText,
+                      { color: theme.colors.text },
+                    ]}
+                  >
+                    {service.name}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.serviceBookings,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    {service.bookings} bookings
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.serviceRevenue,
+                    { color: theme.colors.primary },
+                  ]}
+                >
+                  ₹{service.revenue.toLocaleString()}
+                </Text>
               </View>
-              <Text style={[styles.serviceRevenue, { color: theme.colors.primary }]}>₹{service.revenue.toLocaleString()}</Text>
-            </View>
-          )) : (
-            <Text style={{ textAlign: 'center', color: theme.colors.textSecondary, marginTop: 10 }}>No data available</Text>
+            ))
+          ) : (
+            <Text
+              style={{
+                textAlign: 'center',
+                color: theme.colors.textSecondary,
+                marginTop: 10,
+              }}
+            >
+              No data available
+            </Text>
           )}
         </View>
       </ScrollView>

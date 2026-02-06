@@ -31,13 +31,19 @@ const BookingsStack = () => {
 // Slot Management Stack Navigator (formerly Services Stack)
 const SlotManagementStack = () => {
   return (
-    <Stack.Navigator 
-      screenOptions={{ 
+    <Stack.Navigator
+      screenOptions={{
         headerShown: false,
       }}
     >
-      <Stack.Screen name="ServiceManagementList" component={ServiceManagementScreen} />
-      <Stack.Screen name="AdminServiceDetail" component={AdminServiceDetailScreen} />
+      <Stack.Screen
+        name="ServiceManagementList"
+        component={ServiceManagementScreen}
+      />
+      <Stack.Screen
+        name="AdminServiceDetail"
+        component={AdminServiceDetailScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -45,24 +51,31 @@ const SlotManagementStack = () => {
 const AdminNavigator = () => {
   return (
     <Tab.Navigator
-      tabBar={props => <CustomTabBar {...props} />}
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
       }}
     >
       <Tab.Screen name="DASHBOARD" component={DashboardScreen} />
       <Tab.Screen name="BOOKINGS" component={BookingsStack} />
-      <Tab.Screen 
-        name="SLOT MANAGEMENT" 
+      <Tab.Screen
+        name="SLOT MANAGEMENT"
         component={SlotManagementStack}
         options={({ route }) => {
-          const routeName = getFocusedRouteNameFromRoute(route) ?? 'ServiceManagementList';
+          const routeName =
+            getFocusedRouteNameFromRoute(route) ?? 'ServiceManagementList';
           return {
-            tabBarStyle: routeName === 'AdminServiceDetail' ? { display: 'none' } : undefined,
+            tabBarStyle:
+              routeName === 'AdminServiceDetail'
+                ? { display: 'none' }
+                : undefined,
           };
         }}
       />
-      <Tab.Screen name="EARNINGS AND REPORTS" component={EarningsReportsScreen} />
+      <Tab.Screen
+        name="EARNINGS AND REPORTS"
+        component={EarningsReportsScreen}
+      />
       <Tab.Screen name="VENUE PROFILE" component={AdminMoreScreen} />
     </Tab.Navigator>
   );
