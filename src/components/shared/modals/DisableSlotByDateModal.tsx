@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal,
   View,
   Text,
   StyleSheet,
@@ -14,6 +13,7 @@ import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import BaseModal, { baseModalStyles } from './BaseModal';
 
 interface ServiceSlot {
   id: number;
@@ -131,146 +131,94 @@ const DisableSlotByDateModal: React.FC<DisableSlotByDateModalProps> = ({
   };
 
   return (
-    <Modal
+    <BaseModal
       visible={visible}
-      transparent
+      onClose={onClose}
+      title="Block Slots for Date"
+      subtitle={format(selectedDate, 'EEEE, dd MMMM yyyy')}
       animationType="slide"
-      onRequestClose={onClose}
+      presentationStyle="bottom"
+      sheetHeight="75%"
     >
-      <View style={styles.overlay}>
-        <View
-          style={[styles.modalContent, { backgroundColor: theme.colors.card }]}
-        >
-          <View style={styles.header}>
-            <View>
-              <Text style={[styles.title, { color: theme.colors.text }]}>
-                Block Slots for Date
-              </Text>
-              <Text
-                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
-              >
-                {format(selectedDate, 'EEEE, dd MMMM yyyy')}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons
-                name="close"
-                size={24}
-                color={theme.colors.textSecondary}
-              />
-            </TouchableOpacity>
-          </View>
+      <View style={styles.body}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          Select Slots to Block
+        </Text>
+        <FlatList
+          data={slots}
+          keyExtractor={(item, index) =>
+            (item.id || item.slotId || index).toString()
+          }
+          renderItem={renderSlotItem}
+          numColumns={3}
+          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={styles.columnWrapper}
+        />
 
-          <View style={styles.body}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-              Select Slots to Block
-            </Text>
-            <FlatList
-              data={slots}
-              keyExtractor={(item, index) =>
-                (item.id || item.slotId || index).toString()
-              }
-              renderItem={renderSlotItem}
-              numColumns={3}
-              contentContainerStyle={styles.listContent}
-              columnWrapperStyle={styles.columnWrapper}
-            />
-
-            <View style={styles.reasonContainer}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                Reason for Blocking
-              </Text>
-              <TextInput
-                style={[
-                  styles.reasonInput,
-                  {
-                    color: theme.colors.text,
-                    borderColor: theme.colors.border,
-                  },
-                ]}
-                value={reason}
-                onChangeText={setReason}
-                placeholder="Enter reason (e.g. Maintenance)"
-                placeholderTextColor={theme.colors.textSecondary}
-              />
-            </View>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={[
-                styles.cancelButton,
-                { borderColor: theme.colors.border },
-              ]}
-              onPress={onClose}
-              disabled={saving}
-            >
-              <Text
-                style={[
-                  styles.cancelText,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                Cancel
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.confirmButton,
-                {
-                  backgroundColor:
-                    selectedSlotIds.length > 0 ? '#EF4444' : '#CBD5E1',
-                },
-              ]}
-              onPress={handleConfirm}
-              disabled={saving || selectedSlotIds.length === 0}
-            >
-              {saving ? (
-                <ActivityIndicator color="#FFF" size="small" />
-              ) : (
-                <Text style={styles.confirmText}>
-                  Block {selectedSlotIds.length} Slot(s)
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
+        <View style={styles.reasonContainer}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Reason for Blocking
+          </Text>
+          <TextInput
+            style={[
+              styles.reasonInput,
+              {
+                color: theme.colors.text,
+                borderColor: theme.colors.border,
+              },
+            ]}
+            value={reason}
+            onChangeText={setReason}
+            placeholder="Enter reason (e.g. Maintenance)"
+            placeholderTextColor={theme.colors.textSecondary}
+          />
         </View>
       </View>
-    </Modal>
+
+      <View style={baseModalStyles.footer}>
+        <TouchableOpacity
+          style={[
+            baseModalStyles.cancelButton,
+            { borderColor: theme.colors.border },
+          ]}
+          onPress={onClose}
+          disabled={saving}
+        >
+          <Text
+            style={[
+              baseModalStyles.cancelText,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            Cancel
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            baseModalStyles.confirmButton,
+            {
+              backgroundColor:
+                selectedSlotIds.length > 0 ? '#EF4444' : '#CBD5E1',
+            },
+          ]}
+          onPress={handleConfirm}
+          disabled={saving || selectedSlotIds.length === 0}
+        >
+          {saving ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <Text style={baseModalStyles.confirmText}>
+              Block {selectedSlotIds.length} Slot(s)
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </BaseModal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    height: '75%',
-    borderTopLeftRadius: ms(24),
-    borderTopRightRadius: ms(24),
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: s(20),
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E2E8F0',
-  },
-  title: {
-    fontSize: ms(18),
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: ms(13),
-    marginTop: vs(2),
-  },
-  closeButton: {
-    padding: s(5),
-  },
   body: {
     flex: 1,
     padding: s(20),
@@ -313,37 +261,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: s(15),
     fontSize: ms(14),
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: s(20),
-    gap: s(12),
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E2E8F0',
-  },
-  cancelButton: {
-    flex: 1,
-    height: vs(44),
-    borderRadius: ms(10),
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cancelText: {
-    fontSize: ms(14),
-    fontWeight: '600',
-  },
-  confirmButton: {
-    flex: 2,
-    height: vs(44),
-    borderRadius: ms(10),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  confirmText: {
-    color: '#FFF',
-    fontSize: ms(14),
-    fontWeight: 'bold',
   },
 });
 

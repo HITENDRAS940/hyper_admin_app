@@ -23,6 +23,7 @@ import BookingCard from '../../components/shared/cards/BookingCard';
 import { s, vs, ms } from 'react-native-size-matters';
 import { format, subDays } from 'date-fns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ScreenHeader from '../../components/shared/ScreenHeader';
 
 const BookingHistoryScreen = () => {
   const { theme } = useTheme();
@@ -144,23 +145,17 @@ const BookingHistoryScreen = () => {
   return (
     <ScreenWrapper style={[styles.container, { backgroundColor: '#F9FAFB' }]}>
       {/* Clean Header */}
-      <View style={[styles.cleanHeader, { paddingTop: insets.top + 10 }]}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
-          Booking History
-        </Text>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity
-            onPress={() => setShowFilters(true)}
-            style={styles.iconCircle}
-          >
-            <Ionicons
-              name="options-outline"
-              size={20}
-              color={theme.colors.text}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Booking History"
+        paddingTop={insets.top + 10}
+        actions={[
+          {
+            icon: 'options-outline',
+            variant: 'outline',
+            onPress: () => setShowFilters(true),
+          },
+        ]}
+      />
 
       <View style={styles.summaryRow}>
         <View style={styles.summaryItem}>
@@ -323,34 +318,6 @@ const BookingHistoryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  cleanHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: s(24),
-    paddingBottom: vs(20),
-    backgroundColor: '#F9FAFB',
-  },
-  headerTitle: {
-    fontSize: ms(28),
-    fontWeight: '800',
-    letterSpacing: -1,
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: s(12),
-  },
-  iconCircle: {
-    width: s(40),
-    height: s(40),
-    borderRadius: s(20),
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
   list: {
     padding: ms(20),

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
-  Animated,
 } from 'react-native';
 import { s, vs, ms } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,57 +15,25 @@ import { adminAPI } from '../../services/api';
 import ProfileIcon from '../../components/shared/icons/ProfileIcon';
 import { ManagerUser } from '../../types';
 import { ScreenWrapper } from '../../components/shared/ScreenWrapper';
+import usePaginatedFetch from '../../hooks/usePaginatedFetch';
 
 const UserManagementScreen = () => {
   const { theme } = useTheme();
-  const [users, setUsers] = useState<ManagerUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
 
-  const fetchUsers = useCallback(
-    async (pageNum: number, isRefresh: boolean = false) => {
-      try {
-        if (!isRefresh && pageNum > 0) setLoadingMore(true);
-        const response = await adminAPI.getUsers(pageNum, 10);
-        const { content, last } = response.data;
+  const fetchUsers = useCallback(async (page: number, size: number) => {
+    const response = await adminAPI.getUsers(page, size);
+    return response.data;
+  }, []);
 
-        if (isRefresh) {
-          setUsers(content);
-        } else {
-          setUsers((prev) => [...prev, ...content]);
-        }
-        setHasMore(!last);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-        setLoadingMore(false);
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    fetchUsers(0);
-  }, [fetchUsers]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    setPage(0);
-    fetchUsers(0, true);
-  };
-
-  const loadMore = () => {
-    if (hasMore && !loadingMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchUsers(nextPage);
-    }
-  };
+  const {
+    data: users,
+    loading,
+    refreshing,
+    loadingMore,
+    page,
+    onRefresh,
+    onLoadMore: loadMore,
+  } = usePaginatedFetch<ManagerUser>({ fetchFn: fetchUsers });
 
   const renderUserItem = ({ item }: { item: ManagerUser }) => {
     if (!item) return null;

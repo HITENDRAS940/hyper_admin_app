@@ -28,6 +28,7 @@ import { format } from 'date-fns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import BookingCard from '../../components/shared/cards/BookingCard';
+import { screenHeaderStyles } from '../../components/shared/ScreenHeader';
 
 const AllBookingsScreen = () => {
   const { theme } = useTheme();
@@ -381,19 +382,20 @@ const AllBookingsScreen = () => {
       {/* Clean Sticky Header */}
       <Animated.View
         style={[
-          styles.cleanHeader,
+          screenHeaderStyles.header,
           headerStyle,
           {
             height: HEADER_BASE_HEIGHT,
             paddingTop: insets.top,
+            paddingBottom: 0,
             backgroundColor: theme.colors.background,
           },
         ]}
       >
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+        <Text style={[screenHeaderStyles.title, { color: theme.colors.text }]}>
           Live Bookings
         </Text>
-        <View style={styles.headerIcons}>
+        <View style={screenHeaderStyles.actions}>
           <TouchableOpacity
             onPress={() => navigation.navigate('BookingHistory')}
             activeOpacity={0.7}
@@ -594,23 +596,6 @@ const AllBookingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  cleanHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: s(24),
-    backgroundColor: '#F8F9FA',
-  },
-  headerTitle: {
-    fontSize: ms(26),
-    fontWeight: '800',
-    letterSpacing: -0.8,
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: s(12),
   },
   iconCircle: {
     width: s(44),

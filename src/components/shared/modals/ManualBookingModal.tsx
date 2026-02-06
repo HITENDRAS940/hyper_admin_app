@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal,
   View,
   Text,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
 import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import BaseModal, { baseModalStyles } from './BaseModal';
 
 interface ServiceSlot {
   id: number;
@@ -157,160 +157,104 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
   };
 
   return (
-    <Modal
+    <BaseModal
       visible={visible}
-      transparent
+      onClose={onClose}
+      title="Manual Offline Booking"
+      subtitle={`${serviceName} • ${selectedDate}`}
       animationType="slide"
-      onRequestClose={onClose}
+      presentationStyle="bottom"
+      sheetHeight="80%"
     >
-      <View style={styles.overlay}>
-        <View
-          style={[styles.modalContent, { backgroundColor: theme.colors.card }]}
-        >
-          <View style={styles.header}>
-            <View>
-              <Text style={[styles.title, { color: theme.colors.text }]}>
-                Manual Offline Booking
-              </Text>
-              <Text
-                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
-              >
-                {serviceName} • {selectedDate}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons
-                name="close"
-                size={24}
-                color={theme.colors.textSecondary}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.body}>
-            <View style={styles.summaryBox}>
-              <View style={styles.summaryItem}>
-                <Text
-                  style={[
-                    styles.summaryLabel,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
-                  Selected Slots
-                </Text>
-                <Text
-                  style={[styles.summaryValue, { color: theme.colors.text }]}
-                >
-                  {selectedSlotIds.length}
-                </Text>
-              </View>
-              <View style={styles.summaryItem}>
-                <Text
-                  style={[
-                    styles.summaryLabel,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
-                  Total Price
-                </Text>
-                <Text
-                  style={[styles.summaryValue, { color: theme.colors.primary }]}
-                >
-                  ₹{totalPrice}
-                </Text>
-              </View>
-            </View>
-
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-              Select Time Slots
+      <View style={styles.body}>
+        <View style={styles.summaryBox}>
+          <View style={styles.summaryItem}>
+            <Text
+              style={[
+                styles.summaryLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              Selected Slots
             </Text>
-            <FlatList
-              data={slots}
-              keyExtractor={(item, index) =>
-                (item.id || item.slotId || index).toString()
-              }
-              renderItem={renderSlotItem}
-              numColumns={3}
-              contentContainerStyle={styles.listContent}
-              columnWrapperStyle={styles.columnWrapper}
-            />
+            <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+              {selectedSlotIds.length}
+            </Text>
           </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
+          <View style={styles.summaryItem}>
+            <Text
               style={[
-                styles.cancelButton,
-                { borderColor: theme.colors.border },
+                styles.summaryLabel,
+                { color: theme.colors.textSecondary },
               ]}
-              onPress={onClose}
-              disabled={saving}
             >
-              <Text
-                style={[
-                  styles.cancelText,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                Cancel
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.confirmButton,
-                {
-                  backgroundColor:
-                    selectedSlotIds.length > 0
-                      ? theme.colors.primary
-                      : '#CBD5E1',
-                },
-              ]}
-              onPress={handleConfirm}
-              disabled={saving || selectedSlotIds.length === 0}
+              Total Price
+            </Text>
+            <Text
+              style={[styles.summaryValue, { color: theme.colors.primary }]}
             >
-              {saving ? (
-                <ActivityIndicator color="#FFF" size="small" />
-              ) : (
-                <Text style={styles.confirmText}>Confirm Booking</Text>
-              )}
-            </TouchableOpacity>
+              ₹{totalPrice}
+            </Text>
           </View>
         </View>
+
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          Select Time Slots
+        </Text>
+        <FlatList
+          data={slots}
+          keyExtractor={(item, index) =>
+            (item.id || item.slotId || index).toString()
+          }
+          renderItem={renderSlotItem}
+          numColumns={3}
+          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={styles.columnWrapper}
+        />
       </View>
-    </Modal>
+
+      <View style={baseModalStyles.footer}>
+        <TouchableOpacity
+          style={[
+            baseModalStyles.cancelButton,
+            { borderColor: theme.colors.border },
+          ]}
+          onPress={onClose}
+          disabled={saving}
+        >
+          <Text
+            style={[
+              baseModalStyles.cancelText,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            Cancel
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            baseModalStyles.confirmButton,
+            {
+              backgroundColor:
+                selectedSlotIds.length > 0 ? theme.colors.primary : '#CBD5E1',
+            },
+          ]}
+          onPress={handleConfirm}
+          disabled={saving || selectedSlotIds.length === 0}
+        >
+          {saving ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <Text style={baseModalStyles.confirmText}>Confirm Booking</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </BaseModal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    height: '80%',
-    borderTopLeftRadius: ms(24),
-    borderTopRightRadius: ms(24),
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: s(20),
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E2E8F0',
-  },
-  title: {
-    fontSize: ms(18),
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: ms(13),
-    marginTop: vs(2),
-  },
-  closeButton: {
-    padding: s(5),
-  },
   body: {
     flex: 1,
     padding: s(20),
@@ -376,37 +320,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: s(2),
     right: s(2),
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: s(20),
-    gap: s(12),
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E2E8F0',
-  },
-  cancelButton: {
-    flex: 1,
-    height: vs(44),
-    borderRadius: ms(10),
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cancelText: {
-    fontSize: ms(14),
-    fontWeight: '600',
-  },
-  confirmButton: {
-    flex: 2,
-    height: vs(44),
-    borderRadius: ms(10),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  confirmText: {
-    color: '#FFF',
-    fontSize: ms(14),
-    fontWeight: 'bold',
   },
 });
 

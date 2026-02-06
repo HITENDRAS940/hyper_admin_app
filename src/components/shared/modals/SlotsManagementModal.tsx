@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Modal,
   View,
   Text,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
 import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import BaseModal from './BaseModal';
 
 interface ServiceSlot {
   id: number;
@@ -149,137 +149,75 @@ const SlotsManagementModal: React.FC<SlotsManagementModalProps> = ({
   );
 
   return (
-    <Modal
+    <BaseModal
       visible={visible}
-      transparent
+      onClose={onClose}
+      title="Manage Slots"
+      subtitle={serviceName}
       animationType="slide"
-      onRequestClose={onClose}
+      presentationStyle="bottom"
+      sheetHeight="80%"
+      headerRight={
+        onRefresh ? (
+          <TouchableOpacity onPress={onRefresh} style={styles.iconButton}>
+            <Ionicons name="refresh" size={20} color={theme.colors.primary} />
+          </TouchableOpacity>
+        ) : undefined
+      }
     >
-      <View style={styles.overlay}>
-        <View
-          style={[styles.modalContent, { backgroundColor: theme.colors.card }]}
-        >
-          <View style={styles.header}>
-            <View>
-              <Text style={[styles.title, { color: theme.colors.text }]}>
-                Manage Slots
-              </Text>
-              <Text
-                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
-              >
-                {serviceName}
-              </Text>
-            </View>
-            <View style={styles.headerRight}>
-              {onRefresh && (
-                <TouchableOpacity onPress={onRefresh} style={styles.iconButton}>
-                  <Ionicons
-                    name="refresh"
-                    size={20}
-                    color={theme.colors.primary}
-                  />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity onPress={onClose} style={styles.iconButton}>
-                <Ionicons
-                  name="close"
-                  size={24}
-                  color={theme.colors.textSecondary}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {loading ? (
-            <View style={styles.center}>
-              <ActivityIndicator size="large" color={theme.colors.primary} />
-            </View>
-          ) : (
-            <FlatList
-              data={localSlots}
-              keyExtractor={(item, index) =>
-                (item.id || item.slotId || index).toString()
-              }
-              renderItem={renderSlotItem}
-              contentContainerStyle={styles.listContent}
-              ListEmptyComponent={
-                <View style={styles.center}>
-                  <Text style={{ color: theme.colors.textSecondary }}>
-                    No slots configured
-                  </Text>
-                </View>
-              }
-            />
-          )}
-
-          <View style={styles.footer}>
-            <Text
-              style={[
-                styles.changeCount,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
-              {changedSlotIds.size} change(s) pending
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.saveButton,
-                {
-                  backgroundColor:
-                    changedSlotIds.size > 0 ? theme.colors.primary : '#CBD5E1',
-                },
-              ]}
-              onPress={handleSave}
-              disabled={saving || changedSlotIds.size === 0}
-            >
-              {saving ? (
-                <ActivityIndicator color="#FFF" size="small" />
-              ) : (
-                <Text style={styles.saveText}>Save All Changes</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
+      ) : (
+        <FlatList
+          data={localSlots}
+          keyExtractor={(item, index) =>
+            (item.id || item.slotId || index).toString()
+          }
+          renderItem={renderSlotItem}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.center}>
+              <Text style={{ color: theme.colors.textSecondary }}>
+                No slots configured
+              </Text>
+            </View>
+          }
+        />
+      )}
+
+      <View style={styles.footer}>
+        <Text
+          style={[styles.changeCount, { color: theme.colors.textSecondary }]}
+        >
+          {changedSlotIds.size} change(s) pending
+        </Text>
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            {
+              backgroundColor:
+                changedSlotIds.size > 0 ? theme.colors.primary : '#CBD5E1',
+            },
+          ]}
+          onPress={handleSave}
+          disabled={saving || changedSlotIds.size === 0}
+        >
+          {saving ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <Text style={styles.saveText}>Save All Changes</Text>
+          )}
+        </TouchableOpacity>
       </View>
-    </Modal>
+    </BaseModal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    height: '80%',
-    borderTopLeftRadius: ms(24),
-    borderTopRightRadius: ms(24),
-    elevation: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: s(20),
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E2E8F0',
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: s(15),
-  },
   iconButton: {
     padding: s(5),
-  },
-  title: {
-    fontSize: ms(20),
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: ms(12),
-    marginTop: vs(2),
   },
   listContent: {
     padding: s(20),
