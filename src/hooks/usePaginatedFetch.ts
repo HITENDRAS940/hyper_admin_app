@@ -6,6 +6,7 @@ interface PaginatedResponse<T> {
 }
 
 interface UsePaginatedFetchOptions<T> {
+  /** The fetch function. Must be memoized with useCallback to avoid unnecessary re-fetches. */
   fetchFn: (page: number, size: number) => Promise<PaginatedResponse<T>>;
   pageSize?: number;
 }

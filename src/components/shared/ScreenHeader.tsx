@@ -44,7 +44,7 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         <View style={styles.actions}>
           {actions.map((action, index) => (
             <TouchableOpacity
-              key={index}
+              key={`${action.icon}-${action.variant ?? 'outline'}`}
               style={
                 action.variant === 'filled'
                   ? styles.filledCircle
