@@ -259,4 +259,4 @@ const styles = ScaledSheet.create({
 }) as any;
 
 
-export default StatCard;
+export default React.memo(StatCard);

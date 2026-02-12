@@ -33,7 +33,7 @@ const ServiceManagementScreen = () => {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const scrollHandler = useTabScroll();
-  const styles = createStyles(theme);
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const fetchServices = useCallback(
     (page: number, size: number) => adminAPI.getServices(page, size),
@@ -51,12 +51,19 @@ const ServiceManagementScreen = () => {
     onLoadMore: handleLoadMore,
   } = usePaginatedFetch<Service>({ fetchFn: fetchServices });
 
-  const handleServicePress = (service: Service) => {
+  const handleServicePress = useCallback((service: Service) => {
     navigation.navigate('AdminServiceDetail', {
       serviceId: service.id,
       service,
     });
-  };
+  }, [navigation]);
+
+  const renderServiceCard = useCallback(({ item }: { item: Service }) => (
+    <AdminServiceCard
+      service={item}
+      onPress={() => handleServicePress(item)}
+    />
+  ), [handleServicePress]);
 
   const renderFooter = () => {
     if (!loadingMore) return <View style={{ height: vs(20) }} />;
@@ -112,12 +119,7 @@ const ServiceManagementScreen = () => {
             onScroll={scrollHandler}
             scrollEventThrottle={16}
             data={services}
-            renderItem={({ item }) => (
-              <AdminServiceCard
-                service={item}
-                onPress={() => handleServicePress(item)}
-              />
-            )}
+            renderItem={renderServiceCard}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContainer}
             refreshControl={
