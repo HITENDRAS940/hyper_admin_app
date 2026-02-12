@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { s, vs, ms } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,7 @@ const AdminServiceCard: React.FC<AdminServiceCardProps> = ({
   onPress,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const availabilityStatus = service?.availability ?? true;
   const statusColor = availabilityStatus
@@ -295,4 +295,4 @@ const createStyles = (theme: any) =>
     },
   });
 
-export default AdminServiceCard;
+export default React.memo(AdminServiceCard);
