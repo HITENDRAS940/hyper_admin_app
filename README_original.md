@@ -1,4 +1,4 @@
-# Admin App Archive
+# Hyper Chief Admin App
 
 This folder contains the Admin functionality that was separated from the main User-focused application.
 

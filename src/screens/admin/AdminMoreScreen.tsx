@@ -16,9 +16,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import GradientHeader from '../../components/shared/GradientHeader';
 
+import Animated from 'react-native-reanimated';
+import { useTabScroll } from '../../hooks/useTabScroll';
+
 const AdminMoreScreen = () => {
   const { logout } = useAuth();
   const { theme } = useTheme();
+  const scrollHandler = useTabScroll();
 
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -186,7 +190,9 @@ const AdminMoreScreen = () => {
         subtitle="Manage your venue details"
       />
 
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
       >
@@ -217,10 +223,10 @@ const AdminMoreScreen = () => {
 
         <View style={styles.footer}>
           <Text style={[styles.version, { color: theme.colors.textSecondary }]}>
-            ServiceBooking Admin v1.0.0
+            Hyper Chief Admin v1.0.0
           </Text>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </ScreenWrapper>
   );
 };

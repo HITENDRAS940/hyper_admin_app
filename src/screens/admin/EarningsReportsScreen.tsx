@@ -18,9 +18,13 @@ import StatCard from '../../components/shared/cards/StatCard';
 import { adminAPI } from '../../services/api';
 import { format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated from 'react-native-reanimated';
+import { useTabScroll } from '../../hooks/useTabScroll';
+import Skeleton from '../../components/shared/Skeleton';
 
 const EarningsReportsScreen = () => {
   const { theme } = useTheme();
+  const scrollHandler = useTabScroll();
 
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -73,19 +77,7 @@ const EarningsReportsScreen = () => {
     }
   };
 
-  if (loading && !refreshing) {
-    return (
-      <ScreenWrapper
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        safeAreaEdges={['left', 'right']}
-      >
-        <GradientHeader title="Reports" subtitle="Loading analytics..." />
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </ScreenWrapper>
-    );
-  }
+  const isDataLoading = loading && !refreshing;
 
   const revenue = data?.revenue || { total: 0, trend: 0 };
   const bookingsBySport = data?.bookingsBySport || [];
@@ -99,7 +91,9 @@ const EarningsReportsScreen = () => {
     >
       <GradientHeader title="Earnings" subtitle="Revenue & Venue Performance" />
 
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -158,13 +152,11 @@ const EarningsReportsScreen = () => {
             <StatCard
               title="This Week"
               value={`₹${(data?.weeklyRevenue || 0).toLocaleString()}`}
-              icon="cash-outline"
               color="#10B981"
             />
             <StatCard
               title="Today"
               value={`₹${(data?.dailyRevenue || 0).toLocaleString()}`}
-              icon="today-outline"
               color="#3B82F6"
             />
           </View>
@@ -172,13 +164,11 @@ const EarningsReportsScreen = () => {
             <StatCard
               title="Total Bookings"
               value={`${data?.bookings?.total || 0}`}
-              icon="calendar-outline"
               color="#6366F1"
             />
             <StatCard
               title="Cancellation Rate"
               value={`${data?.cancellationRate || 0}%`}
-              icon="close-circle-outline"
               color="#F87171"
             />
           </View>
@@ -193,39 +183,53 @@ const EarningsReportsScreen = () => {
         <View
           style={[styles.chartCard, { backgroundColor: theme.colors.card }]}
         >
-          {bookingsBySport.map((item: any, index: number) => (
-            <View key={index} style={styles.sportItem}>
-              <View style={styles.sportInfo}>
-                <Text style={[styles.sportName, { color: theme.colors.text }]}>
-                  {item.sport}
-                </Text>
+          {isDataLoading ? (
+            <View style={{ gap: vs(12) }}>
+              <Skeleton height={vs(40)} width="100%" borderRadius={ms(10)} />
+              <Skeleton height={vs(40)} width="100%" borderRadius={ms(10)} />
+              <Skeleton height={vs(40)} width="100%" borderRadius={ms(10)} />
+            </View>
+          ) : bookingsBySport.length > 0 ? (
+            bookingsBySport.map((item: any, index: number) => (
+              <View key={index} style={styles.sportItem}>
+                <View style={styles.sportInfo}>
+                  <Text style={[styles.sportName, { color: theme.colors.text }]}>
+                    {item.sport}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.sportRevenue,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    ₹{item.revenue.toLocaleString()}
+                  </Text>
+                </View>
+                <View style={styles.sportBarContainer}>
+                  <View
+                    style={[
+                      styles.sportBar,
+                      {
+                        width: `${(item.count / (data?.bookings?.total || 1)) * 100}%`,
+                        backgroundColor: theme.colors.primary,
+                      },
+                    ]}
+                  />
+                </View>
                 <Text
-                  style={[
-                    styles.sportRevenue,
-                    { color: theme.colors.textSecondary },
-                  ]}
+                  style={[styles.sportCount, { color: theme.colors.primary }]}
                 >
-                  ₹{item.revenue.toLocaleString()}
+                  {item.count}
                 </Text>
               </View>
-              <View style={styles.sportBarContainer}>
-                <View
-                  style={[
-                    styles.sportBar,
-                    {
-                      width: `${(item.count / (data?.bookings?.total || 1)) * 100}%`,
-                      backgroundColor: theme.colors.primary,
-                    },
-                  ]}
-                />
-              </View>
-              <Text
-                style={[styles.sportCount, { color: theme.colors.primary }]}
-              >
-                {item.count}
+            ))
+          ) : (
+            <View style={{ padding: vs(20), alignItems: 'center' }}>
+              <Text style={{ color: theme.colors.textSecondary }}>
+                No booking data available
               </Text>
             </View>
-          ))}
+          )}
         </View>
 
         {/* Peak Hours Chart */}
@@ -383,7 +387,7 @@ const EarningsReportsScreen = () => {
             </Text>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </ScreenWrapper>
   );
 };

@@ -11,13 +11,17 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useScroll } from '../../contexts/ScrollContext';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  withSpring,
 } from 'react-native-reanimated';
 import ProfileIcon from './icons/ProfileIcon';
+import HomeIcon from './icons/HomeIcon';
+import CalendarIcon from './icons/CalendarIcon';
+import ClockIcon from './icons/ClockIcon';
+import ReportsIcon from './icons/ReportsIcon';
 
 const { width } = Dimensions.get('window');
 
@@ -28,68 +32,47 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  const { tabBarTranslateY: scrollTranslateY } = useScroll();
 
   const focusedRoute = state.routes[state.index];
   const focusedOptions = descriptors[focusedRoute.key].options;
 
-  const translateY = useSharedValue(0);
+  const internalTranslateY = useSharedValue(0);
   const opacity = useSharedValue(1);
   const isHidden = (focusedOptions as any)?.tabBarStyle?.display === 'none';
 
   React.useEffect(() => {
     if (isHidden) {
-      translateY.value = withTiming(100, { duration: 300 });
+      internalTranslateY.value = withTiming(100, { duration: 300 });
       opacity.value = withTiming(0, { duration: 250 });
     } else {
-      translateY.value = withTiming(0, { duration: 300 });
+      internalTranslateY.value = withTiming(0, { duration: 300 });
       opacity.value = withTiming(1, { duration: 250 });
     }
   }, [isHidden]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateY: translateY.value }],
+      transform: [
+        { translateY: internalTranslateY.value + scrollTranslateY.value },
+      ],
       opacity: opacity.value,
     };
   });
 
   const getIcon = (routeName: string, isFocused: boolean) => {
-    const color = isFocused ? theme.colors.secondary : theme.colors.gray;
-    const size = ms(20);
+    const color = isFocused ? theme.colors.primary : theme.colors.textSecondary;
+    const size = ms(22);
 
     switch (routeName) {
       case 'DASHBOARD':
-        return (
-          <Ionicons
-            name={isFocused ? 'grid' : 'grid-outline'}
-            size={size}
-            color={color}
-          />
-        );
-      case 'BOOKING MANAGEMENT':
-        return (
-          <Ionicons
-            name={isFocused ? 'calendar' : 'calendar-outline'}
-            size={size}
-            color={color}
-          />
-        );
+        return <HomeIcon color={color} size={size} />;
+      case 'BOOKINGS':
+        return <CalendarIcon color={color} size={size} />;
       case 'SLOT MANAGEMENT':
-        return (
-          <Ionicons
-            name={isFocused ? 'time' : 'time-outline'}
-            size={size}
-            color={color}
-          />
-        );
+        return <ClockIcon color={color} size={size} />;
       case 'EARNINGS AND REPORTS':
-        return (
-          <Ionicons
-            name={isFocused ? 'stats-chart' : 'stats-chart-outline'}
-            size={size}
-            color={color}
-          />
-        );
+        return <ReportsIcon color={color} size={size} />;
       case 'VENUE PROFILE':
         return <ProfileIcon color={color} size={size} />;
       default:
@@ -101,7 +84,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
     switch (routeName) {
       case 'DASHBOARD':
         return 'Home';
-      case 'BOOKING MANAGEMENT':
+      case 'BOOKINGS':
         return 'Bookings';
       case 'SLOT MANAGEMENT':
         return 'Slots';
@@ -168,8 +151,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     styles.label,
                     {
                       color: isFocused
-                        ? theme.colors.secondary
-                        : theme.colors.gray,
+                        ? theme.colors.primary
+                        : theme.colors.textSecondary,
                       fontWeight: isFocused ? '700' : '500',
                     },
                   ]}
@@ -180,7 +163,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   <View
                     style={[
                       styles.activeIndicator,
-                      { backgroundColor: theme.colors.secondary },
+                      { backgroundColor: theme.colors.primary },
                     ]}
                   />
                 )}
@@ -205,7 +188,7 @@ const styles = ScaledSheet.create({
     flexDirection: 'row',
     marginHorizontal: '16@s',
     marginBottom: '8@vs',
-    borderRadius: '24@ms',
+    borderRadius: '100@ms',
     height: '65@vs',
     alignItems: 'center',
     justifyContent: 'space-around',

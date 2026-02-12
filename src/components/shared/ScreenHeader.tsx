@@ -16,6 +16,9 @@ interface ScreenHeaderProps {
   subtitle?: string;
   actions?: HeaderAction[];
   paddingTop?: number;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+  rightComponent?: React.ReactNode;
 }
 
 const ScreenHeader: React.FC<ScreenHeaderProps> = ({
@@ -23,45 +26,65 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   subtitle,
   actions = [],
   paddingTop = 0,
+  showBackButton = false,
+  onBackPress,
+  rightComponent,
 }) => {
   const { theme } = useTheme();
 
   return (
     <View style={[styles.header, { paddingTop }]}>
-      <View>
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          {title}
-        </Text>
-        {subtitle && (
-          <Text
-            style={[styles.subtitleText, { color: theme.colors.textSecondary }]}
+      <View style={styles.titleSection}>
+        {showBackButton && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBackPress}
+            activeOpacity={0.7}
           >
-            {subtitle}
-          </Text>
+            <Ionicons name="arrow-back" size={ms(24)} color={theme.colors.text} />
+          </TouchableOpacity>
         )}
-      </View>
-      {actions.length > 0 && (
-        <View style={styles.actions}>
-          {actions.map((action, index) => (
-            <TouchableOpacity
-              key={`${action.icon}-${action.variant ?? 'outline'}`}
-              style={
-                action.variant === 'filled'
-                  ? styles.filledCircle
-                  : styles.outlineCircle
-              }
-              onPress={action.onPress}
+        <View>
+          <Text style={[styles.title, { color: theme.colors.text }]}>
+            {title}
+          </Text>
+          {subtitle && (
+            <Text
+              style={[styles.subtitleText, { color: theme.colors.textSecondary }]}
             >
-              <Ionicons
-                name={action.icon}
-                size={
-                  action.iconSize ?? (action.variant === 'filled' ? 24 : 20)
-                }
-                color={action.variant === 'filled' ? '#FFF' : theme.colors.text}
-              />
-            </TouchableOpacity>
-          ))}
+              {subtitle}
+            </Text>
+          )}
         </View>
+      </View>
+      {rightComponent ? (
+        <View style={styles.rightComponent}>{rightComponent}</View>
+      ) : (
+        actions.length > 0 && (
+          <View style={styles.actions}>
+            {actions.map((action, index) => (
+              <TouchableOpacity
+                key={`${action.icon}-${action.variant ?? 'outline'}`}
+                style={
+                  action.variant === 'filled'
+                    ? styles.filledCircle
+                    : styles.outlineCircle
+                }
+                onPress={action.onPress}
+              >
+                <Ionicons
+                  name={action.icon}
+                  size={
+                    action.iconSize ?? (action.variant === 'filled' ? 24 : 20)
+                  }
+                  color={
+                    action.variant === 'filled' ? '#FFF' : theme.colors.text
+                  }
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )
       )}
     </View>
   );
@@ -77,19 +100,33 @@ export const screenHeaderStyles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   title: {
-    fontSize: ms(28),
+    fontSize: ms(24),
     fontWeight: '800',
-    letterSpacing: -1,
+    letterSpacing: -0.5,
+  },
+  titleSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  backButton: {
+    marginRight: s(12),
+    padding: s(4),
+    marginLeft: -s(4),
   },
   subtitleText: {
-    fontSize: ms(14),
+    fontSize: ms(13),
     fontWeight: '500',
-    marginTop: -vs(2),
+    marginTop: -vs(1),
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: s(12),
+  },
+  rightComponent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   outlineCircle: {
     width: s(40),

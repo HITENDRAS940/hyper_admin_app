@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../constants/config';
-import { Service, AdminBooking, PaginatedResponse } from '../types';
+import { Service, AdminBooking, PaginatedResponse, Resource, ResourceSlot } from '../types';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -105,6 +105,21 @@ export const adminAPI = {
     const res = await api.post('/admin/booking/manual', data);
     return res.data;
   },
+  manualBooking: async (data: {
+    serviceId: number;
+    resourceId: number;
+    activityCode: string;
+    bookingDate: string;
+    startTime: string;
+    endTime: string;
+    amount: number;
+    onlineAmountPaid: number;
+    venueAmountCollected: number;
+    remarks: string;
+  }): Promise<any> => {
+    const res = await api.post('/admin/manual-bookings', data);
+    return res.data;
+  },
   updateBookingStatus: async (
     bookingId: number,
     status: string,
@@ -158,6 +173,16 @@ export const adminAPI = {
   },
   setServiceNotAvailable: async (serviceId: string): Promise<any> => {
     const res = await api.post(`/admin/service/${serviceId}/not-available`);
+    return res.data;
+  },
+  getResources: async (serviceId: number): Promise<Resource[]> => {
+    const res = await api.get(`/admin/services/${serviceId}/resources`);
+    return res.data;
+  },
+  getResourceSlots: async (resourceId: number, date: string): Promise<ResourceSlot[]> => {
+    const res = await api.get(`/admin/resources/${resourceId}/slots`, {
+      params: { date }
+    });
     return res.data;
   },
 
@@ -220,7 +245,12 @@ export const adminAPI = {
   },
 
   getAnalyticsSummary: async (): Promise<any> => {
-    const res = await api.get('/admin/analytics/summary');
+    const res = await api.get('/admin/dashboard/stats');
+    return res.data;
+  },
+
+  getBookingByReference: async (reference: string): Promise<any> => {
+    const res = await api.get(`/admin/bookings/by-reference/${reference}`);
     return res.data;
   },
 

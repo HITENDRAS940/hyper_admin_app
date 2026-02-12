@@ -12,11 +12,17 @@ import AdminServiceDetailScreen from '../screens/admin/AdminServiceDetailScreen'
 import UserManagementScreen from '../screens/admin/UserManagementScreen';
 import EarningsReportsScreen from '../screens/admin/EarningsReportsScreen';
 import BookingHistoryScreen from '../screens/admin/BookingHistoryScreen';
+import ManualBookingScreen from '../screens/admin/ManualBookingScreen';
+import ManualBookingResourceScreen from '../screens/admin/ManualBookingResourceScreen';
+import ManualBookingSlotScreen from '../screens/admin/ManualBookingSlotScreen';
+import ManualBookingConfirmScreen from '../screens/admin/ManualBookingConfirmScreen';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 import CustomTabBar from '../components/shared/CustomTabBar';
+import { ScrollProvider } from '../contexts/ScrollContext';
 
 // Bookings Stack (Live + History)
 const BookingsStack = () => {
@@ -44,40 +50,63 @@ const SlotManagementStack = () => {
         name="AdminServiceDetail"
         component={AdminServiceDetailScreen}
       />
+      <Stack.Screen
+        name="ManualBooking"
+        component={ManualBookingScreen}
+      />
+      <Stack.Screen
+        name="ManualBookingResource"
+        component={ManualBookingResourceScreen}
+      />
+      <Stack.Screen
+        name="ManualBookingSlot"
+        component={ManualBookingSlotScreen}
+      />
+      <Stack.Screen
+        name="ManualBookingConfirm"
+        component={ManualBookingConfirmScreen}
+      />
     </Stack.Navigator>
   );
 };
 
 const AdminNavigator = () => {
   return (
-    <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tab.Screen name="DASHBOARD" component={DashboardScreen} />
-      <Tab.Screen name="BOOKINGS" component={BookingsStack} />
-      <Tab.Screen
-        name="SLOT MANAGEMENT"
-        component={SlotManagementStack}
-        options={({ route }) => {
-          const routeName =
-            getFocusedRouteNameFromRoute(route) ?? 'ServiceManagementList';
-          return {
-            tabBarStyle:
-              routeName === 'AdminServiceDetail'
-                ? { display: 'none' }
-                : undefined,
-          };
+    <ScrollProvider>
+      <Tab.Navigator
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{
+          headerShown: false,
         }}
-      />
-      <Tab.Screen
-        name="EARNINGS AND REPORTS"
-        component={EarningsReportsScreen}
-      />
-      <Tab.Screen name="VENUE PROFILE" component={AdminMoreScreen} />
-    </Tab.Navigator>
+      >
+        <Tab.Screen name="DASHBOARD" component={DashboardScreen} />
+        <Tab.Screen 
+          name="BOOKINGS" 
+          component={BookingsStack} 
+          options={({ route }) => {
+            const routeName = getFocusedRouteNameFromRoute(route) ?? 'LiveBookings';
+            return {
+              tabBarStyle: routeName === 'BookingHistory' ? { display: 'none' } : undefined,
+            };
+          }}
+        />
+        <Tab.Screen
+          name="SLOT MANAGEMENT"
+          component={SlotManagementStack}
+          options={({ route }) => {
+            const routeName = getFocusedRouteNameFromRoute(route) ?? 'ServiceManagementList';
+            return {
+              tabBarStyle: routeName !== 'ServiceManagementList' ? { display: 'none' } : undefined,
+            };
+          }}
+        />
+        <Tab.Screen
+          name="EARNINGS AND REPORTS"
+          component={EarningsReportsScreen}
+        />
+        <Tab.Screen name="VENUE PROFILE" component={AdminMoreScreen} />
+      </Tab.Navigator>
+    </ScrollProvider>
   );
 };
 

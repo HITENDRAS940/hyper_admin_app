@@ -3,28 +3,32 @@ import {
   StyleSheet,
   View,
   Text,
-  StatusBar,
   ScrollView,
   TouchableOpacity,
   Dimensions,
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ScaledSheet, s, vs, ms } from 'react-native-size-matters';
+import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../contexts/ThemeContext';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenWrapper } from '../../components/shared/ScreenWrapper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import StatCard from '../../components/shared/cards/StatCard';
 import ScreenHeader from '../../components/shared/ScreenHeader';
+import { adminAPI } from '../../services/api';
+import QRScannerModal from '../../components/admin/QRScannerModal';
+import BookingDetailsModal from '../../components/admin/BookingDetailsModal';
+import { ActivityIndicator, Alert } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { useTabScroll } from '../../hooks/useTabScroll';
+import Skeleton from '../../components/shared/Skeleton';
 
 const { width } = Dimensions.get('window');
 
-// Local Components for Dashboard
 const PerformanceSection = ({ theme }: { theme: any }) => {
   const peakHours = [
-    { hour: '6am', value: 20 },
+    { hour: '6am', value: 80 },
     { hour: '9am', value: 45 },
     { hour: '12pm', value: 30 },
     { hour: '3pm', value: 55 },
@@ -325,32 +329,96 @@ const DashboardScreen = () => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
+  const scrollHandler = useTabScroll();
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('Weekly');
+  const [scannerVisible, setScannerVisible] = useState(false);
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [scannedBooking, setScannedBooking] = useState<any>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  const fetchAnalytics = async () => {
+    try {
+      const res = await adminAPI.getAnalyticsSummary();
+      setData(res);
+    } catch (error) {
+      console.error('Error fetching dashboard analytics:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
+    fetchAnalytics();
+  };
+
+  const handleScan = async (data: string) => {
+    setScannerVisible(false);
+    setIsScanning(true);
+    try {
+      // Assuming the QR code value IS the reference
+      const booking = await adminAPI.getBookingByReference(data);
+      setScannedBooking(booking);
+      setDetailsVisible(true);
+    } catch (error: any) {
+      console.error('Error fetching booking by reference:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Could not find booking with this reference.'
+      );
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const timeToggles = ['Monthly', 'Weekly', 'Today'];
 
+  const todayBooking = data?.todayBooking || { online: 0, offline: 0 };
+  const monthlyBooking = data?.monthlyBooking || { online: 0, offline: 0 };
+  const todayRevenue = data?.todayRevenue || { online: 0, offline: 0 };
+  const monthlyRevenue = data?.monthlyRevenue || { online: 0, offline: 0 };
+
+  const isDataLoading = loading && !refreshing;
+
   return (
     <ScreenWrapper
       style={[styles.container, { backgroundColor: '#F9FAFB' }]}
-      safeAreaEdges={['left', 'right']}
     >
       {/* Refined Header */}
-      <ScreenHeader
-        title="Dashboard"
-        paddingTop={insets.top + 10}
-        actions={[
-          { icon: 'moon-outline', variant: 'outline' },
-          { icon: 'infinite-outline', variant: 'filled' },
-        ]}
+      <ScreenHeader 
+        title="Dashboard" 
+        paddingTop={vs(10)} 
+        rightComponent={
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={[styles.headerBtn, { backgroundColor: theme.colors.primary + '15', borderColor: theme.colors.primary + '30' }]}
+              onPress={() => navigation.navigate('SLOT MANAGEMENT', { screen: 'ManualBooking' })}
+            >
+              <Ionicons name="add-circle-outline" size={20} color={theme.colors.primary} />
+              <Text style={[styles.headerBtnText, { color: theme.colors.primary }]}>Manual</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.headerBtn, { backgroundColor: theme.colors.primary }]}
+              onPress={() => setScannerVisible(true)}
+            >
+              <Ionicons name="qr-code-outline" size={20} color="#FFF" />
+              <Text style={[styles.headerBtnText, { color: '#FFF' }]}>Scan QR</Text>
+            </TouchableOpacity>
+          </View>
+        }
       />
 
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -365,32 +433,60 @@ const DashboardScreen = () => {
         {/* Metrics Grid 2x2 */}
         <View style={styles.metricsGrid}>
           <View style={styles.metricsRow}>
-            <StatCard
-              variant="dark"
-              title="Total Menus"
-              value="120"
-              progress={45}
-            />
-            <StatCard
-              variant="light"
-              title="Total Orders"
-              value="180"
-              progress={62}
-            />
+            {isDataLoading ? (
+              <Skeleton height={vs(100)} width="48%" borderRadius={ms(16)} />
+            ) : (
+              <StatCard
+                variant="dark"
+                title="Today Bookings"
+                value={todayBooking.online + todayBooking.offline}
+                subMetrics={[
+                  {label: 'Online', value: todayBooking.online},
+                  {label: 'Offline', value: todayBooking.offline}
+                ]}
+              />
+            )}
+            {isDataLoading ? (
+              <Skeleton height={vs(100)} width="48%" borderRadius={ms(16)} />
+            ) : (
+              <StatCard
+                variant="light"
+                title="Monthly Bookings"
+                value={monthlyBooking.online + monthlyBooking.offline}
+                subMetrics={[
+                  { label: 'Online', value: monthlyBooking.online },
+                  { label: 'Offline', value: monthlyBooking.offline },
+                ]}
+              />
+            )}
           </View>
           <View style={styles.metricsRow}>
-            <StatCard
-              variant="light"
-              title="Total Clients"
-              value="240"
-              progress={80}
-            />
-            <StatCard
-              variant="light"
-              title="Revenue"
-              value="140"
-              progress={85}
-            />
+            {isDataLoading ? (
+              <Skeleton height={vs(100)} width="48%" borderRadius={ms(16)} />
+            ) : (
+              <StatCard
+                variant="light"
+                title="Today's Revenue"
+                value={`₹${(todayRevenue.online + todayRevenue.offline).toLocaleString()}`}
+                subMetrics={[
+                  { label: 'Online', value: `₹${Number(todayRevenue.online).toLocaleString()}` },
+                  { label: 'Offline', value: `₹${Number(todayRevenue.offline).toLocaleString()}` },
+                ]}
+              />
+            )}
+            {isDataLoading ? (
+              <Skeleton height={vs(100)} width="48%" borderRadius={ms(16)} />
+            ) : (
+              <StatCard
+                variant="dark"
+                title="Monthly Revenue"
+                value={`₹${(monthlyRevenue.online + monthlyRevenue.offline).toLocaleString()}`}
+                subMetrics={[
+                  { label: 'Online', value: `₹${Number(monthlyRevenue.online).toLocaleString()}` },
+                  { label: 'Offline', value: `₹${Number(monthlyRevenue.offline).toLocaleString()}` },
+                ]}
+              />
+            )}
           </View>
         </View>
 
@@ -427,10 +523,24 @@ const DashboardScreen = () => {
         </View>
 
         {/* Performance Section */}
-        <PerformanceSection theme={theme} />
+        {isDataLoading ? (
+          <View style={{ marginVertical: vs(10) }}>
+            <Skeleton height={vs(200)} width="100%" borderRadius={ms(16)} />
+          </View>
+        ) : (
+          <PerformanceSection theme={theme} />
+        )}
 
         {/* Activity Feed */}
-        <ActivityFeed theme={theme} />
+        {isDataLoading ? (
+          <View style={{ gap: vs(12), marginTop: vs(10), padding: s(20) }}>
+            <Skeleton height={vs(70)} width="100%" borderRadius={ms(12)} />
+            <Skeleton height={vs(70)} width="100%" borderRadius={ms(12)} />
+            <Skeleton height={vs(70)} width="100%" borderRadius={ms(12)} />
+          </View>
+        ) : (
+          <ActivityFeed theme={theme} />
+        )}
 
         {/* Quick Access to Main Screens */}
         <View style={styles.quickAccessSection}>
@@ -502,7 +612,26 @@ const DashboardScreen = () => {
             ))}
           </View>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
+
+      <QRScannerModal
+        visible={scannerVisible}
+        onClose={() => setScannerVisible(false)}
+        onScan={handleScan}
+      />
+
+      <BookingDetailsModal
+        visible={detailsVisible}
+        onClose={() => setDetailsVisible(false)}
+        booking={scannedBooking}
+        onBookingCompleted={fetchAnalytics}
+      />
+
+      {isScanning && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      )}
     </ScreenWrapper>
   );
 };
@@ -510,6 +639,39 @@ const DashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: s(8),
+    marginTop: vs(10),
+  },
+  headerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: s(10),
+    paddingVertical: vs(8),
+    borderRadius: ms(20),
+    gap: s(4),
+    borderWidth: 1,
+    borderColor: 'transparent',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  headerBtnText: {
+    fontSize: ms(11),
+    fontWeight: '700',
+  },
+  headerIcon: {
+    marginTop: vs(15), // Align with header text padding
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
@@ -519,7 +681,7 @@ const styles = StyleSheet.create({
   },
   metricsGrid: {
     paddingHorizontal: s(20),
-    paddingTop: vs(10),
+    paddingTop: vs(20),
     gap: ms(12),
   },
   metricsRow: {
@@ -720,6 +882,7 @@ const styles = StyleSheet.create({
   },
   activityDesc: {
     fontSize: ms(12),
+    lineHeight: ms(18),
   },
   activityTime: {
     fontSize: ms(11),
@@ -754,6 +917,13 @@ const styles = StyleSheet.create({
   manageTitle: {
     fontSize: ms(14),
     fontWeight: '700',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
 });
 

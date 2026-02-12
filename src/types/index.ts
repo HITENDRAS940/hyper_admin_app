@@ -61,14 +61,14 @@ export interface Booking {
   serviceId: string;
   userId: string;
   status:
-    | 'pending'
-    | 'confirmed'
-    | 'cancelled'
-    | 'completed'
-    | 'PENDING'
-    | 'CONFIRMED'
-    | 'CANCELLED'
-    | 'COMPLETED';
+  | 'pending'
+  | 'confirmed'
+  | 'cancelled'
+  | 'completed'
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'CANCELLED'
+  | 'COMPLETED';
   date: string;
   bookingDate?: string;
   createdAt?: string;
@@ -149,4 +149,36 @@ export interface PaginatedResponse<T> {
   totalElements: number;
   totalPages: number;
   last: boolean;
+}
+
+export interface Activity {
+  id: number;
+  code: string;
+  name: string;
+  enabled: boolean;
+}
+
+export interface Resource {
+  id: number;
+  serviceId: number;
+  serviceName: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  activities: Activity[];
+}
+
+export interface ResourceSlot {
+  slotId: string;
+  startTime: string;
+  endTime: string;
+  displayName: string;
+  durationMinutes: number;
+  basePrice: number;
+  totalPrice: number;
+  price: number;
+  status: 'AVAILABLE' | 'BOOKED' | 'DISABLED' | string;
+  statusReason?: string;
+  isEnabled: boolean;
+  slotDate: string;
 }

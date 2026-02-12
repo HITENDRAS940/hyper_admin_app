@@ -17,6 +17,9 @@ import { Service } from '../../types';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from 'react-native-size-matters';
+import Animated from 'react-native-reanimated';
+import { useTabScroll } from '../../hooks/useTabScroll';
+import Skeleton from '../../components/shared/Skeleton';
 
 // Shared Components
 import LoadingState from '../../components/shared/LoadingState';
@@ -29,6 +32,7 @@ const ServiceManagementScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
+  const scrollHandler = useTabScroll();
   const styles = createStyles(theme);
 
   const fetchServices = useCallback(
@@ -64,38 +68,25 @@ const ServiceManagementScreen = () => {
   };
 
   return (
-    <ScreenWrapper style={styles.container} safeAreaEdges={['left', 'right']}>
+    <ScreenWrapper style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
       {/* Refined Header like Dashboard */}
       <ScreenHeader
         title="Services"
         subtitle="Manage venue listings"
-        paddingTop={insets.top + 10}
-        actions={[
-          {
-            icon: 'arrow-back',
-            variant: 'outline',
-            iconSize: 22,
-            onPress: () => navigation.goBack(),
-          },
-          {
-            icon: 'add',
-            variant: 'filled',
-            iconSize: 28,
-            onPress: () =>
-              Alert.alert(
-                'Coming Soon',
-                'Dynamic service creation will be available soon.',
-              ),
-          },
-        ]}
+        paddingTop={vs(10)}
       />
 
       {/* Service List */}
       <View style={{ flex: 1 }}>
         {loading && page === 0 ? (
-          <LoadingState />
+          <View style={{ padding: ms(16), gap: vs(12) }}>
+            <Skeleton height={vs(100)} width="100%" borderRadius={ms(16)} />
+            <Skeleton height={vs(100)} width="100%" borderRadius={ms(16)} />
+            <Skeleton height={vs(100)} width="100%" borderRadius={ms(16)} />
+            <Skeleton height={vs(100)} width="100%" borderRadius={ms(16)} />
+          </View>
         ) : error && services.length === 0 ? (
           <View style={styles.emptyContainer}>
             <EmptyState
@@ -117,7 +108,9 @@ const ServiceManagementScreen = () => {
             />
           </View>
         ) : (
-          <FlatList
+          <Animated.FlatList
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
             data={services}
             renderItem={({ item }) => (
               <AdminServiceCard

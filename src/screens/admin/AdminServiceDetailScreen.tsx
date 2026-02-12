@@ -1,4 +1,4 @@
-// filepath: /Users/hitendrasingh/Desktop/EzTurf/src/screens/admin/AdminTurfDetailScreen.tsx
+// filepath: /Users/hitendrasingh/Desktop/admin-app/src/screens/admin/AdminServiceDetailScreen.tsx
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
-  StatusBar,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -18,10 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { s, vs, ms } from 'react-native-size-matters';
 import { ScreenWrapper } from '../../components/shared/ScreenWrapper';
 import { format } from 'date-fns';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import LocationIcon from '../../components/shared/icons/LocationIcon';
-import BackIcon from '../../components/shared/icons/BackIcon';
 
 // Shared Components
 import RevenueCard from '../../components/shared/cards/RevenueCard';
@@ -32,6 +28,7 @@ import AvailabilityModal from '../../components/shared/modals/AvailabilityModal'
 import ManualBookingModal from '../../components/shared/modals/ManualBookingModal';
 import DisableSlotByDateModal from '../../components/shared/modals/DisableSlotByDateModal';
 import ArenaSettingsTab from '../../components/admin/ArenaSettingsTab';
+import ScreenHeader from '../../components/shared/ScreenHeader';
 
 // Utilities
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
@@ -49,7 +46,7 @@ interface ServiceSlot {
   price: number;
   enabled: boolean;
   isBooked?: boolean;
-  isDisabledDate?: boolean; // New flag for date-specific disable
+  isDisabledDate?: boolean;
   disableReason?: string;
 }
 
@@ -99,7 +96,7 @@ const AdminServiceDetailScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookings, setBookings] = useState<ServiceBooking[]>([]);
   const [revenue, setRevenue] = useState<RevenueData | null>(null);
-  const [loading, setLoading] = useState(true); // Initial loading
+  const [loading, setLoading] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -167,7 +164,6 @@ const AdminServiceDetailScreen = () => {
       setLoadingSlots(true);
       const dateStr = formatDateToYYYYMMDD(selectedDate);
 
-      // Fetch slot status (booked and disabled slots)
       const slotStatusResponse = await serviceAPI.getSlotStatus(
         service.id,
         dateStr,
@@ -175,35 +171,24 @@ const AdminServiceDetailScreen = () => {
       const { disabled: disabledSlotIds, booked: bookedSlotIds } =
         slotStatusResponse.data;
 
-      // Create Sets for efficient lookup - COERCE TO NUMBERS to handle string IDs from API
-      // We pass the logical IDs (1-24) to the card.
-      // If the API returns db IDs, we might need to map them back to logical IDs, but the request implies we can just pass them.
-      // However, if the API returns mixed, we should probably stick to what we have, but the requirement specifically asked to pass IDs.
-      // Let's pass the arrays derived from the API response.
       const disabledIds = (disabledSlotIds || []).map((id: any) => Number(id));
       const bookedIds = (bookedSlotIds || []).map((id: any) => Number(id));
 
       setDisabledSlotIds(disabledIds);
       setBookedSlotIds(bookedIds);
 
-      // Use slots from route params (initial service data) or state if previously updated
       const baseSlots = currentServiceData.slots || service.slots || [];
 
-      // Map base slots to ensure correct format, but status logic is now in the Card
       const slotsData: ServiceSlot[] = baseSlots.map((slot: any) => {
         const dbId = slot.id || slot.slotId;
         return {
           ...slot,
           slotId: dbId,
-          // We can leave enabled/isBooked "raw" from base config or default,
-          // because the Card will override them with the ID props.
-          // But to be safe, let's just pass them as is.
           enabled: slot.enabled !== false,
-          isBooked: false, // Default false, card overrides
+          isBooked: false,
         };
       });
 
-      // Sort slots by start time to ensure they appear in order
       slotsData.sort((a, b) => {
         let timeA = a.startTime;
         let timeB = b.startTime;
@@ -217,7 +202,6 @@ const AdminServiceDetailScreen = () => {
       console.error('Error fetching slot data:', error);
       Alert.alert('Error', 'Failed to fetch slot details');
 
-      // Fallback
       const rawSlotsData = mapSlotsWithBookingInfo(
         service.slots || [],
         new Set(),
@@ -237,7 +221,6 @@ const AdminServiceDetailScreen = () => {
       setLoadingBookings(true);
       const dateStr = formatDateToYYYYMMDD(selectedDate);
 
-      // Fetch bookings for this service on the selected date
       const bookingsData = await adminAPI.getServiceBookings(
         service.id,
         dateStr,
@@ -257,27 +240,12 @@ const AdminServiceDetailScreen = () => {
         bookingsList = bookingsData.data;
       }
 
-      // Filter bookings to only show those matching the selected date
       const filteredBookings = bookingsList.filter((b: ServiceBooking) => {
         return b.bookingDate === dateStr;
       });
 
       setBookings(filteredBookings);
 
-      // We need slot structure to calculate availability for Revenue Card
-      // We can reuse the slots from state if available, or base structure
-      const baseSlots = currentServiceData.slots || service.slots || [];
-      // Simplistic mapping for revenue calc - we just need counts
-      const slotsForRevenue: ServiceSlot[] = baseSlots.map((slot: any) => ({
-        ...slot,
-        slotId: slot.id || slot.slotId,
-        // We know which are booked from filteredBookings if we wanted to be precise,
-        // but revenueUtils calculates this from bookings list + total slots.
-        // Effectively we just need the array length and prices.
-      }));
-
-      // Use bookings list + total slots to calculate revenue metrics
-      // @ts-ignore - calculateRevenueData is a dummy in research mode
       const revenueData = calculateRevenueData();
       setRevenue(revenueData as any);
     } catch (error: any) {
@@ -305,10 +273,7 @@ const AdminServiceDetailScreen = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() + days);
     setSelectedDate(newDate);
-    // Loading state is handled in individual fetch functions which will trigger via useEffect
   };
-
-  // Management Actions
 
   const handleManageSlots = async () => {
     await loadSlots();
@@ -373,7 +338,7 @@ const AdminServiceDetailScreen = () => {
   };
 
   const handleDisableSlot = () => {
-    setCurrentStep('disableSlot'); // Use the new ModalStep type
+    setCurrentStep('disableSlot');
   };
 
   const handleDisableSlotConfirm = async (slotId: number, reason: string) => {
@@ -388,7 +353,6 @@ const AdminServiceDetailScreen = () => {
       });
 
       Alert.alert('Success', 'Slot disabled successfully');
-      // Only refresh if on slots tab, which we likely are if disabling a slot
       if (activeTab === 'slots') fetchSlotData();
     } catch (error: any) {
       Alert.alert(
@@ -409,7 +373,6 @@ const AdminServiceDetailScreen = () => {
         bookingDate: dateStr,
       });
 
-      // Refresh data to show new booking
       if (activeTab === 'slots') fetchSlotData();
       else if (activeTab === 'bookings') fetchBookingData();
     } catch (error: any) {
@@ -421,8 +384,6 @@ const AdminServiceDetailScreen = () => {
     try {
       setLoading(true);
       await adminAPI.updateServiceProfile(service.id, updatedData);
-
-      // Update local service detail state
       setCurrentServiceData((prev: any) => ({ ...prev, ...updatedData }));
       Alert.alert('Success', 'Arena profile updated successfully');
     } catch (error: any) {
@@ -436,11 +397,8 @@ const AdminServiceDetailScreen = () => {
     }
   };
 
-  // Modal Callbacks
-
   const handleSlotsSave = async (updatedSlots: SlotConfig[]) => {
     try {
-      // Update each slot
       for (const slot of updatedSlots) {
         const slotId = Number(slot.slotId);
         if (slot.price !== undefined) {
@@ -454,11 +412,10 @@ const AdminServiceDetailScreen = () => {
         }
       }
 
-      // Refresh service data to reflect latest DB state
       if (activeTab === 'slots') fetchSlotData();
       else fetchBookingData();
     } catch (error: any) {
-      throw error; // Re-throw to let modal handle the error
+      throw error;
     }
   };
 
@@ -473,7 +430,7 @@ const AdminServiceDetailScreen = () => {
       if (activeTab === 'slots') fetchSlotData();
       else fetchBookingData();
     } catch (error: any) {
-      throw error; // Re-throw to let modal handle the error
+      throw error;
     }
   };
 
@@ -481,7 +438,6 @@ const AdminServiceDetailScreen = () => {
     setCurrentStep('none');
   };
 
-  // Render Bookings List
   const renderBookingsList = () => {
     if (bookings.length === 0) {
       return (
@@ -515,289 +471,24 @@ const AdminServiceDetailScreen = () => {
 
   return (
     <ScreenWrapper
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      safeAreaEdges={['bottom', 'left', 'right']}
+      style={[styles.container, { backgroundColor: '#F9FAFB' }]}
     >
-      <StatusBar barStyle="light-content" />
-      <StatusBar barStyle="light-content" />
-
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <LinearGradient
-          colors={[theme.colors.primary, theme.colors.secondary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.headerGradient, { paddingTop: insets.top + vs(10) }]}
-        >
-          <View style={styles.headerContent}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.backButton}
-            >
-              <BackIcon width={24} height={24} fill="#FFFFFF" />
-            </TouchableOpacity>
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle} numberOfLines={1}>
-                {service.name}
-              </Text>
-              <View style={styles.headerLocationRow}>
-                <LocationIcon size={14} color="rgba(255, 255, 255, 0.9)" />
-                <Text style={styles.headerSubtitle} numberOfLines={1}>
-                  {service.location}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              onPress={handleDeleteService}
-              style={[
-                styles.backButton,
-                {
-                  marginLeft: 16,
-                  marginRight: 0,
-                  backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                },
-              ]}
-            >
-              <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-      </View>
-
-      {/* Management Action Buttons */}
-      <View
-        style={[
-          styles.actionButtonsContainer,
-          { backgroundColor: theme.colors.background },
+      <ScreenHeader
+        title={service.name}
+        subtitle={service.location}
+        paddingTop={vs(10)}
+        actions={[
+          {
+            icon: 'trash-outline',
+            variant: 'outline',
+            onPress: handleDeleteService,
+          },
         ]}
-      >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.actionButtonsRow}
-        >
-          <TouchableOpacity
-            style={[
-              styles.actionChip,
-              {
-                backgroundColor: theme.colors.primary + '15',
-                borderColor: theme.colors.primary + '30',
-              },
-            ]}
-            onPress={handleManageSlots}
-          >
-            <Ionicons name="time" size={18} color={theme.colors.primary} />
-            <Text
-              style={[styles.actionChipText, { color: theme.colors.primary }]}
-            >
-              Slots
-            </Text>
-          </TouchableOpacity>
+      />
 
-          <TouchableOpacity
-            style={[
-              styles.actionChip,
-              {
-                backgroundColor: theme.colors.primary + '15',
-                borderColor: theme.colors.primary + '30',
-              },
-            ]}
-            onPress={handleManageAvailability}
-          >
-            <Ionicons name="toggle" size={18} color={theme.colors.primary} />
-            <Text
-              style={[styles.actionChipText, { color: theme.colors.primary }]}
-            >
-              Availability
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.actionChip,
-              { backgroundColor: '#10B98115', borderColor: '#10B98130' },
-            ]}
-            onPress={handleManualBooking}
-          >
-            <Ionicons name="add-circle" size={18} color="#10B981" />
-            <Text style={[styles.actionChipText, { color: '#10B981' }]}>
-              Book
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.actionChip,
-              { backgroundColor: '#F9731615', borderColor: '#F9731630' },
-            ]}
-            onPress={handleDisableSlot}
-          >
-            <Ionicons name="ban" size={18} color="#F97316" />
-            <Text style={[styles.actionChipText, { color: '#F97316' }]}>
-              Disable
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-
-      {/* View Mode Toggle */}
-      <View style={styles.viewModeToggle}>
-        <TouchableOpacity
-          style={[styles.modeButton, viewMode === 'daily' && styles.activeMode]}
-          onPress={() => setViewMode('daily')}
-        >
-          <Text
-            style={[
-              styles.modeText,
-              viewMode === 'daily' && styles.activeModeText,
-            ]}
-          >
-            Daily
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.modeButton,
-            viewMode === 'weekly' && styles.activeMode,
-          ]}
-          onPress={() => setViewMode('weekly')}
-        >
-          <Text
-            style={[
-              styles.modeText,
-              viewMode === 'weekly' && styles.activeModeText,
-            ]}
-          >
-            Weekly
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Date Selector */}
-      <View
-        style={[styles.dateSelector, { backgroundColor: theme.colors.card }]}
-      >
-        <TouchableOpacity
-          onPress={() => changeDate(-1)}
-          style={styles.dateButton}
-        >
-          <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
-
-        <View style={styles.dateDisplay}>
-          <Text style={[styles.dateText, { color: theme.colors.text }]}>
-            {viewMode === 'daily'
-              ? format(selectedDate, 'EEE, MMM dd, yyyy')
-              : `${format(selectedDate, 'MMM dd')} - ${format(new Date(new Date(selectedDate).setDate(selectedDate.getDate() + 6)), 'MMM dd')}`}
-          </Text>
-          {viewMode === 'daily' &&
-            formatDateToYYYYMMDD(selectedDate) ===
-              formatDateToYYYYMMDD(new Date()) && (
-              <View
-                style={[
-                  styles.todayBadge,
-                  { backgroundColor: theme.colors.primary + '20' },
-                ]}
-              >
-                <Text
-                  style={[styles.todayText, { color: theme.colors.primary }]}
-                >
-                  Today
-                </Text>
-              </View>
-            )}
-        </View>
-
-        <TouchableOpacity
-          onPress={() => changeDate(viewMode === 'daily' ? 1 : 7)}
-          style={styles.dateButton}
-        >
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color={theme.colors.text}
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Tab Selector */}
-      <View style={styles.tabContainer}>
-        <View
-          style={[styles.tabSelector, { backgroundColor: theme.colors.card }]}
-        >
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === 'slots' && {
-                backgroundColor: theme.colors.primary,
-              },
-            ]}
-            onPress={() => setActiveTab('slots')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                {
-                  color:
-                    activeTab === 'slots' ? '#FFF' : theme.colors.textSecondary,
-                },
-              ]}
-            >
-              Slots
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === 'bookings' && {
-                backgroundColor: theme.colors.primary,
-              },
-            ]}
-            onPress={() => setActiveTab('bookings')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                {
-                  color:
-                    activeTab === 'bookings'
-                      ? '#FFF'
-                      : theme.colors.textSecondary,
-                },
-              ]}
-            >
-              Bookings
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === 'profile' && {
-                backgroundColor: theme.colors.primary,
-              },
-            ]}
-            onPress={() => setActiveTab('profile')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                {
-                  color:
-                    activeTab === 'profile'
-                      ? '#FFF'
-                      : theme.colors.textSecondary,
-                },
-              ]}
-            >
-              Profile
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Content */}
       <ScrollView
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -807,9 +498,141 @@ const AdminServiceDetailScreen = () => {
           />
         }
       >
-        <View style={styles.content}>
+        <View style={styles.actionButtonsContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.actionButtonsRow}
+          >
+            {[
+              { label: 'Slots', icon: 'time', action: handleManageSlots, color: theme.colors.primary },
+              { label: 'Availability', icon: 'toggle', action: handleManageAvailability, color: theme.colors.primary },
+              { label: 'Book', icon: 'add-circle', action: handleManualBooking, color: '#10B981' },
+              { label: 'Disable', icon: 'ban', action: handleDisableSlot, color: '#F97316' },
+            ].map((item, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={[
+                  styles.actionChip,
+                  {
+                    backgroundColor: item.color + '10',
+                    borderColor: item.color + '20',
+                  },
+                ]}
+                onPress={item.action}
+              >
+                <Ionicons name={item.icon as any} size={18} color={item.color} />
+                <Text style={[styles.actionChipText, { color: item.color }]}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.viewModeToggle}>
+          {['daily', 'weekly'].map((mode) => (
+            <TouchableOpacity
+              key={mode}
+              style={[
+                styles.modeButton,
+                viewMode === mode && styles.activeMode,
+                viewMode === mode && { backgroundColor: theme.colors.card },
+              ]}
+              onPress={() => setViewMode(mode as any)}
+            >
+              <Text
+                style={[
+                  styles.modeText,
+                  viewMode === mode && styles.activeModeText,
+                  viewMode === mode && { color: theme.colors.primary },
+                ]}
+              >
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View
+          style={[styles.dateSelector, { backgroundColor: theme.colors.card }]}
+        >
+          <TouchableOpacity
+            onPress={() => changeDate(viewMode === 'daily' ? -1 : -7)}
+            style={styles.dateButton}
+          >
+            <Ionicons name="chevron-back" size={20} color={theme.colors.text} />
+          </TouchableOpacity>
+
+          <View style={styles.dateDisplay}>
+            <Text style={[styles.dateText, { color: theme.colors.text }]}>
+              {viewMode === 'daily'
+                ? format(selectedDate, 'EEE, MMM dd')
+                : `${format(selectedDate, 'MMM dd')} - ${format(new Date(new Date(selectedDate).setDate(selectedDate.getDate() + 6)), 'MMM dd')}`}
+            </Text>
+            {viewMode === 'daily' &&
+              formatDateToYYYYMMDD(selectedDate) ===
+                formatDateToYYYYMMDD(new Date()) && (
+                <View
+                  style={[
+                    styles.todayBadge,
+                    { backgroundColor: theme.colors.primary + '10' },
+                  ]}
+                >
+                  <Text
+                    style={[styles.todayText, { color: theme.colors.primary }]}
+                  >
+                    Today
+                  </Text>
+                </View>
+              )}
+          </View>
+
+          <TouchableOpacity
+            onPress={() => changeDate(viewMode === 'daily' ? 1 : 7)}
+            style={styles.dateButton}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.text}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.tabContainer}>
+          <View
+            style={[styles.tabSelector, { backgroundColor: '#F1F5F9' }]}
+          >
+            {['slots', 'bookings', 'profile'].map((tab) => (
+              <TouchableOpacity
+                key={tab}
+                style={[
+                  styles.tabButton,
+                  activeTab === tab && {
+                    backgroundColor: theme.colors.primary,
+                  },
+                ]}
+                onPress={() => setActiveTab(tab as any)}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    {
+                      color:
+                        activeTab === tab ? '#FFF' : theme.colors.textSecondary,
+                    },
+                  ]}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.mainContent}>
           {activeTab === 'slots' ? (
-            // SLOTS TAB CONTENT
             viewMode === 'daily' ? (
               loadingSlots ? (
                 <View style={styles.center}>
@@ -848,8 +671,7 @@ const AdminServiceDetailScreen = () => {
                   )}
                 </View>
               )
-            ) : // WEEKLY VIEW
-            loadingWeekly ? (
+            ) : loadingWeekly ? (
               <View style={styles.center}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Text
@@ -941,7 +763,6 @@ const AdminServiceDetailScreen = () => {
               </View>
             )
           ) : activeTab === 'bookings' ? (
-            // BOOKINGS TAB CONTENT
             loadingBookings ? (
               <View style={styles.center}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -968,12 +789,10 @@ const AdminServiceDetailScreen = () => {
                     />
                   </View>
                 )}
-
                 <View style={styles.cardContainer}>{renderBookingsList()}</View>
               </>
             )
           ) : (
-            // PROFILE TAB CONTENT
             <ArenaSettingsTab
               service={currentServiceData}
               onSave={handleProfileSave}
@@ -982,8 +801,6 @@ const AdminServiceDetailScreen = () => {
           )}
         </View>
       </ScrollView>
-
-      {/* Modals */}
 
       <SlotsManagementModal
         visible={currentStep === 'slots'}
@@ -1029,131 +846,92 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerContainer: {
-    overflow: 'hidden',
-    borderBottomLeftRadius: ms(24),
-    borderBottomRightRadius: ms(24),
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: vs(4) },
-    shadowOpacity: 0.15,
-    shadowRadius: ms(8),
-    backgroundColor: '#fff',
-  },
-  headerGradient: {
-    paddingBottom: vs(24),
-    paddingHorizontal: s(24),
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    width: s(40),
-    height: s(40),
-    borderRadius: ms(12),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: s(16),
-  },
-  headerTextContainer: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: ms(24),
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: vs(4),
-  },
-  headerLocationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: s(4),
-  },
-  headerSubtitle: {
-    fontSize: ms(14),
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
+  scrollContent: {
+    paddingBottom: vs(40),
   },
   actionButtonsContainer: {
-    paddingVertical: vs(12),
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    paddingVertical: vs(16),
   },
   actionButtonsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: s(20),
-    gap: s(10),
+    paddingHorizontal: s(16),
+    gap: s(12),
   },
   actionChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: vs(8),
-    paddingHorizontal: s(12),
-    borderRadius: ms(20),
+    paddingVertical: vs(10),
+    paddingHorizontal: s(16),
+    borderRadius: ms(12),
     borderWidth: 1,
-    gap: s(6),
+    gap: s(8),
   },
   actionChipText: {
     fontSize: ms(13),
-    fontWeight: '600',
+    fontWeight: '700',
   },
   dateSelector: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: s(20),
-    paddingVertical: vs(16),
-    marginHorizontal: s(20),
-    marginTop: vs(16),
-    marginBottom: vs(8),
+    paddingHorizontal: s(16),
+    paddingVertical: vs(12),
+    marginHorizontal: s(16),
+    marginTop: vs(8),
+    marginBottom: vs(16),
     borderRadius: ms(16),
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: vs(4) },
-    shadowOpacity: 0.08,
-    shadowRadius: ms(12),
-    elevation: 3,
+    shadowOffset: { width: 0, height: vs(2) },
+    shadowOpacity: 0.04,
+    shadowRadius: ms(8),
+    elevation: 2,
   },
   dateButton: {
-    padding: s(8),
+    width: s(32),
+    height: s(32),
+    borderRadius: ms(10),
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   dateDisplay: {
     flex: 1,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: s(8),
+    gap: s(4),
   },
   dateText: {
-    fontSize: ms(16),
-    fontWeight: '600',
+    fontSize: ms(15),
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
   todayBadge: {
     paddingHorizontal: s(8),
     paddingVertical: vs(4),
-    borderRadius: ms(6),
+    borderRadius: ms(8),
   },
   todayText: {
-    fontSize: ms(11),
-    fontWeight: '600',
+    fontSize: ms(10),
+    fontWeight: '800',
+    textTransform: 'uppercase',
   },
   viewModeToggle: {
     flexDirection: 'row',
-    marginHorizontal: s(24),
-    marginTop: vs(12),
+    marginHorizontal: s(16),
+    marginTop: vs(8),
     backgroundColor: '#F1F5F9',
-    borderRadius: ms(10),
+    borderRadius: ms(12),
     padding: s(4),
   },
   modeButton: {
     flex: 1,
-    paddingVertical: vs(8),
+    paddingVertical: vs(10),
     alignItems: 'center',
-    borderRadius: ms(8),
+    borderRadius: ms(10),
   },
   activeMode: {
-    backgroundColor: '#FFF',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -1162,12 +940,11 @@ const styles = StyleSheet.create({
   },
   modeText: {
     fontSize: ms(13),
-    fontWeight: '500',
+    fontWeight: '700',
     color: '#64748B',
   },
   activeModeText: {
-    color: '#0F172A',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   weeklyContainer: {
     gap: vs(12),
@@ -1176,28 +953,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: s(16),
-    borderRadius: ms(12),
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+    borderRadius: ms(20),
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   weeklyDayHeader: {
     flex: 1,
   },
   weeklyDayName: {
     fontSize: ms(16),
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   weeklyDayDate: {
     fontSize: ms(12),
     marginTop: vs(2),
+    fontWeight: '600',
   },
   weeklyStats: {
-    flex: 1.5,
+    flex: 2,
     flexDirection: 'row',
-    gap: s(12),
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    gap: s(8),
   },
   weeklyStatItem: {
     flexDirection: 'row',
@@ -1211,22 +988,22 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: ms(11),
+    fontWeight: '600',
   },
-  content: {
-    padding: s(20),
-    paddingTop: vs(12),
-    paddingBottom: vs(40),
+  mainContent: {
+    paddingHorizontal: s(20),
   },
   cardContainer: {
-    marginBottom: vs(24),
+    marginBottom: vs(16),
   },
   bookingsContainer: {
     marginBottom: vs(20),
   },
   sectionTitle: {
-    fontSize: ms(16),
-    fontWeight: '700',
-    marginBottom: vs(12),
+    fontSize: ms(18),
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginBottom: vs(16),
   },
   emptyBookings: {
     alignItems: 'center',
@@ -1235,35 +1012,38 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: ms(14),
     marginTop: vs(12),
+    fontWeight: '600',
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: vs(40),
   },
   loadingText: {
     marginTop: vs(12),
     fontSize: ms(14),
+    fontWeight: '600',
   },
   tabContainer: {
-    paddingHorizontal: s(20),
-    marginBottom: vs(10),
+    paddingHorizontal: s(16),
+    marginBottom: vs(24),
   },
   tabSelector: {
     flexDirection: 'row',
-    borderRadius: ms(12),
+    borderRadius: ms(14),
     padding: ms(4),
   },
   tabButton: {
     flex: 1,
-    paddingVertical: vs(10),
+    paddingVertical: vs(12),
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: ms(8),
+    borderRadius: ms(12),
   },
   tabText: {
     fontSize: ms(14),
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
 

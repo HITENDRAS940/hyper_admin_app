@@ -1,7 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { s, vs, ms } from 'react-native-size-matters';
 import { useTheme } from '../../../contexts/ThemeContext';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Calculate slot width based on available space
+// Parent (AdminServiceDetailScreen) mainContent padding: s(24) * 2
+// SlotGridCard container padding: s(10) * 2
+// Slot margins: s(5) * 2 per slot * 4 slots = s(40)
+// Total non-content width = s(40) + s(20) + s(40) = s(100)
+const SLOT_SIZE = (SCREEN_WIDTH - s(100)) / 4;
 
 interface ServiceSlot {
   id: number;
@@ -57,8 +66,8 @@ const SlotGridCard: React.FC<SlotGridCardProps> = ({
   };
 
   const formatTime = (time: string) => {
-    // Handle ISO strings or HH:mm
     if (!time) return '';
+    // Handle ISO strings or HH:mm
     if (time.includes('T')) {
       const date = new Date(time);
       return date.toLocaleTimeString([], {
@@ -66,7 +75,8 @@ const SlotGridCard: React.FC<SlotGridCardProps> = ({
         minute: '2-digit',
       });
     }
-    return time;
+    // Clean up if it's like 18:00:00
+    return time.split(':').slice(0, 2).join(':');
   };
 
   return (
@@ -150,18 +160,18 @@ const styles = StyleSheet.create({
     marginHorizontal: s(-5),
   },
   slotItem: {
-    width: (s(360) - s(60)) / 4, // Approx 4 columns with padding
+    width: SLOT_SIZE,
     aspectRatio: 1,
     margin: s(5),
     borderRadius: ms(8),
     borderWidth: 1,
-    padding: s(5),
+    padding: s(2),
     alignItems: 'center',
     justifyContent: 'center',
   },
   timeText: {
-    fontSize: ms(11),
-    fontWeight: 'bold',
+    fontSize: ms(10),
+    fontWeight: '700',
   },
   statusDot: {
     width: ms(6),

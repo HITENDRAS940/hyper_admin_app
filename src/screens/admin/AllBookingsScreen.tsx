@@ -7,7 +7,6 @@ import {
   RefreshControl,
   TouchableOpacity,
   Modal,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import Animated, {
@@ -23,12 +22,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { adminAPI } from '../../services/api';
 import { AdminBooking } from '../../types';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useScroll } from '../../contexts/ScrollContext';
+import { withTiming } from 'react-native-reanimated';
 import EmptyState from '../../components/shared/EmptyState';
 import { format } from 'date-fns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import BookingCard from '../../components/shared/cards/BookingCard';
 import { screenHeaderStyles } from '../../components/shared/ScreenHeader';
+import Skeleton from '../../components/shared/Skeleton';
 
 const AllBookingsScreen = () => {
   const { theme } = useTheme();
@@ -128,6 +130,7 @@ const AllBookingsScreen = () => {
   const translateY = useSharedValue(0);
   const lastScrollY = useSharedValue(0);
 
+  const { tabBarTranslateY } = useScroll();
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       const currentScrollY = event.contentOffset.y;
@@ -138,6 +141,17 @@ const AllBookingsScreen = () => {
         0,
         Math.max(-MAX_SUBHEADER_HEIGHT, translateY.value - diff),
       );
+
+      // Tab Bar Sliding logic
+      if (currentScrollY > 100) {
+        if (diff > 5 && tabBarTranslateY.value === 0) {
+          tabBarTranslateY.value = withTiming(120, { duration: 300 });
+        } else if (diff < -5 && tabBarTranslateY.value > 0) {
+          tabBarTranslateY.value = withTiming(0, { duration: 300 });
+        }
+      } else if (currentScrollY <= 0) {
+        tabBarTranslateY.value = withTiming(0, { duration: 300 });
+      }
 
       // Reset to 0 if at very top (bounces/overscroll)
       if (currentScrollY <= 0) {
@@ -453,11 +467,15 @@ const AllBookingsScreen = () => {
         {loading && !refreshing ? (
           <View
             style={[
-              styles.listLoadingContainer,
-              { marginTop: MAX_SUBHEADER_HEIGHT },
+              styles.list,
+              { paddingTop: MAX_SUBHEADER_HEIGHT + vs(10) },
             ]}
           >
-            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <View style={{ gap: vs(16) }}>
+              <Skeleton height={vs(150)} width="100%" borderRadius={ms(16)} />
+              <Skeleton height={vs(150)} width="100%" borderRadius={ms(16)} />
+              <Skeleton height={vs(150)} width="100%" borderRadius={ms(16)} />
+            </View>
           </View>
         ) : filteredBookings.length === 0 ? (
           <EmptyState
@@ -579,7 +597,7 @@ const AllBookingsScreen = () => {
               disabled={isCancelling}
             >
               {isCancelling ? (
-                <ActivityIndicator color="#FFF" size="small" />
+                <Text style={styles.confirmButtonText}>Cancelling...</Text>
               ) : (
                 <Text style={styles.confirmButtonText}>
                   Confirm Cancellation
