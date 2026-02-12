@@ -26,17 +26,59 @@ import Skeleton from '../../components/shared/Skeleton';
 
 const { width } = Dimensions.get('window');
 
-const PerformanceSection = ({ theme }: { theme: any }) => {
-  const peakHours = [
-    { hour: '6am', value: 80 },
-    { hour: '9am', value: 45 },
-    { hour: '12pm', value: 30 },
-    { hour: '3pm', value: 55 },
-    { hour: '6pm', value: 90 },
-    { hour: '9pm', value: 75 },
-    { hour: '12am', value: 15 },
-  ];
+// Constants moved outside component for better performance
+const PEAK_HOURS = [
+  { hour: '6am', value: 80 },
+  { hour: '9am', value: 45 },
+  { hour: '12pm', value: 30 },
+  { hour: '3pm', value: 55 },
+  { hour: '6pm', value: 90 },
+  { hour: '9pm', value: 75 },
+  { hour: '12am', value: 15 },
+];
 
+const ACTIVITY_FEED_DATA = [
+  {
+    id: 1,
+    type: 'BOOKING',
+    title: 'New booking placed',
+    desc: 'Arena Prime • 6:00 PM',
+    time: '2m ago',
+    icon: 'cart-outline',
+    color: '#4F46E5',
+  },
+  {
+    id: 2,
+    type: 'OFFLINE',
+    title: 'Offline booking added',
+    desc: 'Sunset Turf • 8:30 PM',
+    time: '15m ago',
+    icon: 'person-add-outline',
+    color: '#10B981',
+  },
+  {
+    id: 3,
+    type: 'BLOCK',
+    title: 'Slot blocked',
+    desc: 'City Courts • Multi-slot',
+    time: '1h ago',
+    icon: 'ban-outline',
+    color: '#F59E0B',
+  },
+  {
+    id: 4,
+    type: 'UPDATE',
+    title: 'Venue profile updated',
+    desc: 'Arena Prime • Price change',
+    time: '3h ago',
+    icon: 'create-outline',
+    color: '#EC4899',
+  },
+];
+
+const TIME_TOGGLES = ['Monthly', 'Weekly', 'Today'];
+
+const PerformanceSection = ({ theme }: { theme: any }) => {
   return (
     <View style={styles.performanceContainer}>
       <View style={styles.sectionHeader}>
@@ -109,7 +151,7 @@ const PerformanceSection = ({ theme }: { theme: any }) => {
             Peak Hours
           </Text>
           <View style={styles.chartContainer}>
-            {peakHours.map((item, index) => (
+            {PEAK_HOURS.map((item, index) => (
               <View key={index} style={styles.chartBarWrapper}>
                 <View
                   style={[
@@ -227,45 +269,6 @@ const PerformanceSection = ({ theme }: { theme: any }) => {
 };
 
 const ActivityFeed = ({ theme }: { theme: any }) => {
-  const activities = [
-    {
-      id: 1,
-      type: 'BOOKING',
-      title: 'New booking placed',
-      desc: 'Arena Prime • 6:00 PM',
-      time: '2m ago',
-      icon: 'cart-outline',
-      color: '#4F46E5',
-    },
-    {
-      id: 2,
-      type: 'OFFLINE',
-      title: 'Offline booking added',
-      desc: 'Sunset Turf • 8:30 PM',
-      time: '15m ago',
-      icon: 'person-add-outline',
-      color: '#10B981',
-    },
-    {
-      id: 3,
-      type: 'BLOCK',
-      title: 'Slot blocked',
-      desc: 'City Courts • Multi-slot',
-      time: '1h ago',
-      icon: 'ban-outline',
-      color: '#F59E0B',
-    },
-    {
-      id: 4,
-      type: 'UPDATE',
-      title: 'Venue profile updated',
-      desc: 'Arena Prime • Price change',
-      time: '3h ago',
-      icon: 'create-outline',
-      color: '#EC4899',
-    },
-  ];
-
   return (
     <View style={styles.activitySection}>
       <View style={styles.sectionHeader}>
@@ -279,7 +282,7 @@ const ActivityFeed = ({ theme }: { theme: any }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.activityList}>
-        {activities.map((item) => (
+        {ACTIVITY_FEED_DATA.map((item) => (
           <View
             key={item.id}
             style={[
@@ -378,8 +381,6 @@ const DashboardScreen = () => {
       setIsScanning(false);
     }
   };
-
-  const timeToggles = ['Monthly', 'Weekly', 'Today'];
 
   const todayBooking = data?.todayBooking || { online: 0, offline: 0 };
   const monthlyBooking = data?.monthlyBooking || { online: 0, offline: 0 };
@@ -496,7 +497,7 @@ const DashboardScreen = () => {
             Revenue
           </Text>
           <View style={styles.toggleRow}>
-            {timeToggles.map((tab) => (
+            {TIME_TOGGLES.map((tab) => (
               <TouchableOpacity
                 key={tab}
                 onPress={() => setActiveTab(tab)}

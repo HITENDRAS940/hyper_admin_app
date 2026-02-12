@@ -49,7 +49,8 @@ const SlotsManagementModal: React.FC<SlotsManagementModalProps> = ({
   const [changedSlotIds, setChangedSlotIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    setLocalSlots(JSON.parse(JSON.stringify(slots))); // Deep copy
+    // Deep copy using map instead of JSON.parse for better performance
+    setLocalSlots(slots.map((slot) => ({ ...slot })));
     setChangedSlotIds(new Set());
   }, [slots, visible]);
 

@@ -32,6 +32,16 @@ import BookingCard from '../../components/shared/cards/BookingCard';
 import { screenHeaderStyles } from '../../components/shared/ScreenHeader';
 import Skeleton from '../../components/shared/Skeleton';
 
+// Constants moved outside component for better performance
+const CANCELLATION_REASONS = [
+  'User Requested',
+  'Venue Maintenance',
+  'Weather Conditions',
+  'Double Booking',
+  'Technical Error',
+  'Other',
+];
+
 const AllBookingsScreen = () => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -53,36 +63,30 @@ const AllBookingsScreen = () => {
     [],
   );
 
-  const filters = useMemo(
-    () => [
+  const filters = useMemo(() => {
+    // Single-pass filtering for better performance
+    const counts = {
+      CONFIRMED: 0,
+      PENDING: 0,
+      CANCELLED: 0,
+      COMPLETED: 0,
+    };
+
+    bookings.forEach((b) => {
+      const status = b.status.toUpperCase();
+      if (status in counts) {
+        counts[status as keyof typeof counts]++;
+      }
+    });
+
+    return [
       { key: 'ALL', label: 'All', count: bookings.length },
-      {
-        key: 'CONFIRMED',
-        label: 'Confirmed',
-        count: bookings.filter((b) => b.status.toUpperCase() === 'CONFIRMED')
-          .length,
-      },
-      {
-        key: 'PENDING',
-        label: 'Pending',
-        count: bookings.filter((b) => b.status.toUpperCase() === 'PENDING')
-          .length,
-      },
-      {
-        key: 'CANCELLED',
-        label: 'Cancelled',
-        count: bookings.filter((b) => b.status.toUpperCase() === 'CANCELLED')
-          .length,
-      },
-      {
-        key: 'COMPLETED',
-        label: 'Completed',
-        count: bookings.filter((b) => b.status.toUpperCase() === 'COMPLETED')
-          .length,
-      },
-    ],
-    [bookings],
-  );
+      { key: 'CONFIRMED', label: 'Confirmed', count: counts.CONFIRMED },
+      { key: 'PENDING', label: 'Pending', count: counts.PENDING },
+      { key: 'CANCELLED', label: 'Cancelled', count: counts.CANCELLED },
+      { key: 'COMPLETED', label: 'Completed', count: counts.COMPLETED },
+    ];
+  }, [bookings]);
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -244,15 +248,6 @@ const AllBookingsScreen = () => {
     useState<AdminBooking | null>(null);
   const [cancellationReason, setCancellationReason] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
-
-  const cancellationReasons = [
-    'User Requested',
-    'Venue Maintenance',
-    'Weather Conditions',
-    'Double Booking',
-    'Technical Error',
-    'Other',
-  ];
 
   const handleCancelBooking = useCallback((booking: AdminBooking) => {
     setCancellingBooking(booking);
@@ -542,7 +537,7 @@ const AllBookingsScreen = () => {
             </Text>
 
             <View style={styles.reasonsContainer}>
-              {cancellationReasons.map((reason) => (
+              {CANCELLATION_REASONS.map((reason) => (
                 <TouchableOpacity
                   key={reason}
                   style={[
